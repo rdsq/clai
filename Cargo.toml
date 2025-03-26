@@ -1,0 +1,11 @@
+[package]
+name = "clai"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+async-trait = "0.1.88"
+clap = "4.5.32"
+reqwest = { version = "0.12.15", features = ["json"] }
+serde_json = "1.0.140"
+tokio = { version = "1.44.1", features = ["full"] }
