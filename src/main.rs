@@ -1,4 +1,4 @@
-mod actions;
+mod commands;
 
 use clap::{Parser, Subcommand};
 
@@ -13,11 +13,14 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
+    Gen(commands::generate::Generate),
 }
 
+#[tokio::main]
 fn main() {
     let cli = Cli::parse();
 
     match cli.command {
+        Commands::Generate(args) => commands::generate::generate(args).await,
     }
 }

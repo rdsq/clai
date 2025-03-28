@@ -11,3 +11,9 @@ struct Message {
 struct AppState {
     chat: Vec<Message>,
 }
+
+impl AppState {
+    new() -> Self {
+        AppState { chat: Vec::<Message>new() }
+    }
+}
