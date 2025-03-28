@@ -14,7 +14,7 @@ pub async fn generate(args: Generate) {
     let interface = crate::get_interface::get_interface(&args.model);
     let mut state = app_state::AppState::new();
     state.chat.push(app_state::Message { role: app_state::Role::User, text: args.prompt });
-    let callback = Box::new(|chunk: &str| {
+    let callback = Box::new(|chunk: String| {
         print!("{}", chunk);
         io::stdout().flush().unwrap();
     });

@@ -1,4 +1,4 @@
-struct ParsedModel<'a> {
+pub struct ParsedModel<'a> {
     pub interface: &'a str,
     pub model: &'a str,
 }

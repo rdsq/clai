@@ -3,7 +3,7 @@ use crate::interfaces::frame;
 use futures_util::StreamExt;
 
 pub struct OllamaInterface {
-    model: String,
+    pub model: String,
 }
 
 #[derive(Serialize)]
@@ -42,7 +42,7 @@ struct OllamaRequest {
 
 #[async_trait::async_trait]
 impl frame::Interface for OllamaInterface {
-    async fn generate(&self, state: &crate::app_state::AppState, callback: Box<dyn Fn(&str) -> ()>) -> Result<String, Box<dyn std::error::Error>> {
+    async fn generate(&self, state: &crate::app_state::AppState, callback: Box<dyn Fn(String) -> () + Send>) -> Result<String, Box<dyn std::error::Error>> {
         let client = reqwest::Client::new();
         let res = client
             .post("http://localhost:11434/api/chat")
@@ -52,15 +52,14 @@ impl frame::Interface for OllamaInterface {
                 stream: true,
             })
             .send()
-            .await?;
-        if !res.status().is_success() {
-            Err(res.status())
-        }
+            .await?
+            .error_for_status()?;
         let mut stream = res.bytes_stream();
         let mut full = String::new();
-        while let Some(chunk_bytes) = stream.next().await {
-            let chunk = std::str::from_utf8(&chunk_bytes?)?;
-            full.push_str(chunk);
+        while let Some(chunk_bytes_unknown) = stream.next().await {
+            let chunk_bytes = chunk_bytes_unknown?;
+            let chunk = std::str::from_utf8(&chunk_bytes)?.to_string();
+            full.push_str(&chunk);
             callback(chunk);
         }
         Ok(full)
