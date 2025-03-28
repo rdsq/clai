@@ -58,9 +58,11 @@ impl frame::Interface for OllamaInterface {
         let mut full = String::new();
         while let Some(chunk_bytes_unknown) = stream.next().await {
             let chunk_bytes = chunk_bytes_unknown?;
-            let chunk = std::str::from_utf8(&chunk_bytes)?.to_string();
-            full.push_str(&chunk);
-            callback(chunk);
+            let obj: serde_json::Value = serde_json::from_slice(&chunk_bytes)?;
+            if let Some(message_chunk) = obj.get("message").and_then(|d| d.get("content")).and_then(|v| v.as_str()) {
+                full.push_str(&message_chunk);
+                callback(message_chunk.to_string());
+            }
         }
         Ok(full)
     }
