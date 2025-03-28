@@ -1,15 +1,11 @@
 use std::process::exit;
+use crate::parse_model::parse_model;
 
-pub fn get_interface(input: &str) {
-    let parsed = crate::parse_model(&input).unwrap_or_else(|err| {
+pub fn get_interface(input: &str) -> Box<dyn crate::interfaces::frame::Interface> {
+    let parsed = parse_model(&input).unwrap_or_else(|err| {
         eprintln!("{}", err.to_string());
         exit(1);
     });
-    let interfaces = crate::interfaces::get_interfaces();
-    if let Some(interface) = interfaces.get(parsed.interface) {
-        interface::new(parsed.model)
-    } else {
-        eprintln!("Unknown interface: {}", parsed.interface);
-        exit(1);
-    }
+    let interface = crate::interfaces::get_interface(&parsed.interface, parsed.model.to_string()).unwrap();
+    interface
 }

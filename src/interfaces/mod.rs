@@ -1,9 +1,9 @@
-mod trait;
 mod ollama;
-use std::collections::HashMap;
+pub mod frame;
 
-pub fn get_interfaces() {
-    let mut interfaces: HashMap<String, Box<dyn trait::Interface>> = HashMap::new();
-    interfaces.insert("ollama".to_string(), Box::new(ollama::OllamaInterface));
-    interfaces
+pub fn get_interface(interface: &str, model: String) -> Result<Box<dyn frame::Interface>, String> {
+    return match interface {
+        "ollama" => Ok(Box::new(ollama::OllamaInterface { model })),
+        _ => Err(format!("unknown interface: {}", interface)),
+    }
 }

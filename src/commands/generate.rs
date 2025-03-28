@@ -12,22 +12,25 @@ pub struct Generate {
 
 pub async fn generate(args: Generate) {
     let interface = crate::get_interface::get_interface(&args.model);
-    let state = app_state::AppState::new();
+    let mut state = app_state::AppState::new();
     state.chat.push(app_state::Message { role: app_state::Role::User, text: args.prompt });
     let mut response = String::from("");
-    let res = interface.generate(&state, |chunk| {
+    let mut callback = Box::new(|chunk| {
         response.push_str(chunk);
         print!("{}", chunk);
         io::stdout().flush().unwrap();
-    }).await;
+    });
+    let res = interface.generate(&state, callback).await;
     match res {
+        Ok(_) => {
+            if !response.ends_with("\n") {
+                println!();
+            }
+            state.chat.push(app_state::Message { role: app_state::Role::Model, text: response });
+        },
         Err(e) => {
             eprintln!("{}", e);
             std::process::exit(1);
-        }
+        },
     }
-    if !response.ends_with("\n") {
-        println!();
-    }
-    state.chat.push(app_state::Message { role: app_state::Role::Model, text: response });
 }

@@ -1,19 +1,19 @@
-enum Role {
+pub enum Role {
     User,
     Model,
 }
 
-struct Message {
-    role: Role,
-    text: String,
+pub struct Message {
+    pub role: Role,
+    pub text: String,
 }
 
-struct AppState {
-    chat: Vec<Message>,
+pub struct AppState {
+    pub chat: Vec<Message>,
 }
 
 impl AppState {
-    new() -> Self {
-        AppState { chat: Vec::<Message>new() }
+    pub fn new() -> Self {
+        AppState { chat: Vec::new() }
     }
 }

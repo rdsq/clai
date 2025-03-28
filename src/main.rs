@@ -1,3 +1,7 @@
+mod app_state;
+mod interfaces;
+mod parse_model;
+mod get_interface;
 mod commands;
 
 use clap::{Parser, Subcommand};
@@ -17,10 +21,10 @@ enum Commands {
 }
 
 #[tokio::main]
-fn main() {
+async fn main() {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Generate(args) => commands::generate::generate(args).await,
+        Commands::Gen(args) => commands::generate::generate(args).await,
     }
 }

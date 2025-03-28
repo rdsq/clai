@@ -1,15 +1,11 @@
 use serde::Serialize;
+use crate::interfaces::frame;
 
-struct OllamaInterface {
+pub struct OllamaInterface {
     model: String,
 }
 
-impl OllamaInterface {
-    new(model: String) -> Self {
-        OllamaInterface { model }
-    }
-}
-
+#[derive(Serialize)]
 struct OllamaMessage {
     role: String,
     content: String,
@@ -40,12 +36,12 @@ fn prepare_chat(chat: &Vec<crate::app_state::Message>) -> Vec<OllamaMessage> {
 struct OllamaRequest {
     messages: Vec<OllamaMessage>,
     model: String,
-    stream: Boolean,
+    stream: bool,
 }
 
 #[async_trait::async_trait]
-impl self::trait::Interface for OllamaInterface {
-    async fn generate(&self, &state, callback) {
+impl frame::Interface for OllamaInterface {
+    async fn generate(&self, state: &crate::app_state::AppState, callback: frame::Callback) -> Result<(), Box<dyn std::error::Error>> {
         let client = reqwest::Client::new();
         let res = client
             .post("http://localhost:11434/api/chat")
@@ -54,7 +50,7 @@ impl self::trait::Interface for OllamaInterface {
                 model: self.model.clone(),
                 stream: true,
             })
-            .send
+            .send()
             .await?;
         if !res.status().is_success() {
             Err(res.status())
