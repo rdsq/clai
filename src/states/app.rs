@@ -13,6 +13,9 @@ impl AppState {
             interface: InterfaceState::new(interface),
         }
     }
+    pub fn set_interface(&mut self, interface: &str) {
+        self.interface = InterfaceState::new(interface);
+    }
     pub async fn generate(&mut self, prompt: String, callback: Box<dyn Fn(String) -> () + Send>) {
         self.context.chat.push(context::Message { role: context::Role::User, text: prompt });
         let res = self.interface.interface.generate(&self.context, callback).await;

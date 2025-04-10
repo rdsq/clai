@@ -1,4 +1,5 @@
 use crate::states::{AppState, ContextState};
+use crate::prompt::{prompt, UserActions};
 
 #[derive(clap::Parser, Debug)]
 /// Chat with a chatbot
@@ -15,13 +16,11 @@ pub async fn chat(args: Chat) {
     let context = ContextState::from_optional_file(&args.file);
     let mut state = AppState::new(context, &args.model);
     loop {
-        let prompt = rl.readline("\x1b[36;1m>\x1b[0m ");
-        if prompt.is_err() {
-            // probably EOF
-            break;
+        match prompt(&mut rl) {
+            UserActions::Prompt(prompt) => state.generate_to_output(prompt).await,
+            UserActions::Exit => break,
+            UserActions::SetModel(model) => state.set_interface(&model),
         }
-        let prompt = prompt.unwrap();
-        state.generate_to_output(prompt).await;
     }
     if let Some(path) = args.file {
         state.context.write_to_file(&path);
