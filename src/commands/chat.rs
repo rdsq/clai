@@ -23,6 +23,7 @@ pub async fn chat(args: Chat) {
             UserActions::SetModel(model) => state.set_interface(&model),
             UserActions::Save(path) => state.context.write_to_file(&path),
             UserActions::SetFile(path) => file = if path.is_empty() { None } else { Some(path) },
+            UserActions::Help => print!(include_str!("../help-interactive.txt")),
         }
     }
     if let Some(path) = file {

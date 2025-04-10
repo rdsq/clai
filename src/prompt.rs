@@ -4,6 +4,7 @@ pub enum UserActions {
     SetModel(String),
     Save(String),
     SetFile(String),
+    Help,
 }
 
 pub fn prompt(rl: &mut rustyline::DefaultEditor) -> UserActions {
@@ -15,9 +16,12 @@ pub fn prompt(rl: &mut rustyline::DefaultEditor) -> UserActions {
     let (cmd, content) = inp.split_once(' ').unwrap_or((&inp, &inp));
     let content = content.to_string();
     return match cmd {
+        "/help" => UserActions::Help,
+        "/?" => UserActions::Help,
         "/setmodel" => UserActions::SetModel(content),
         "/save" => UserActions::Save(content),
         "/setfile" => UserActions::SetFile(content),
+        "/exit" => UserActions::Exit,
         _ => UserActions::Prompt(content),
     }
 }
