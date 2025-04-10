@@ -1,24 +1,24 @@
-use super::{VisibleState, InterfaceState, visible};
+use super::{ContextState, InterfaceState, context};
 use std::io::{self, Write};
 
 pub struct AppState {
-    pub visible: VisibleState,
+    pub context: ContextState,
     pub interface: InterfaceState,
 }
 
 impl AppState {
     pub fn new(interface: &str) -> Self {
         AppState {
-            visible: VisibleState::new(),
+            context: ContextState::new(),
             interface: InterfaceState::new(interface),
         }
     }
     pub async fn generate(&mut self, prompt: String, callback: Box<dyn Fn(String) -> () + Send>) {
-        self.visible.chat.push(visible::Message { role: visible::Role::User, text: prompt });
-        let res = self.interface.interface.generate(&self.visible, callback).await;
+        self.context.chat.push(context::Message { role: context::Role::User, text: prompt });
+        let res = self.interface.interface.generate(&self.context, callback).await;
         match res {
             Ok(response) => {
-                self.visible.chat.push(visible::Message { role: visible::Role::Model, text: response });
+                self.context.chat.push(context::Message { role: context::Role::Model, text: response });
             },
             Err(e) => {
                 eprintln!("{}", e);
@@ -32,6 +32,6 @@ impl AppState {
             io::stdout().flush().unwrap();
         });
         self.generate(prompt, callback).await;
-        self.visible.chat.last().unwrap().compensate_nl();
+        self.context.chat.last().unwrap().compensate_nl();
     }
 }

@@ -8,11 +8,11 @@ pub struct Message {
     pub text: String,
 }
 
-pub struct VisibleState {
+pub struct ContextState {
     pub chat: Vec<Message>,
 }
 
-impl VisibleState {
+impl ContextState {
     pub fn new() -> Self {
         Self { chat: Vec::new() }
     }

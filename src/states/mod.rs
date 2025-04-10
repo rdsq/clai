@@ -1,7 +1,7 @@
-pub mod visible;
+pub mod context;
 mod interface;
 mod app;
 
-pub use visible::VisibleState;
+pub use context::ContextState;
 pub use interface::InterfaceState;
 pub use app::AppState;
