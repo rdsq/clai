@@ -1,4 +1,4 @@
-use crate::states::{AppState, ContextState};
+use crate::states::AppState;
 
 #[derive(clap::Parser, Debug)]
 /// Generate a response
@@ -13,10 +13,6 @@ pub struct Generate {
 }
 
 pub async fn generate(args: Generate) {
-    let context = ContextState::from_optional_file(&args.file);
-    let mut state = AppState::new(context, &args.model);
+    let mut state = AppState::new(args.file, &args.model);
     state.generate_to_output(args.prompt).await;
-    if let Some(path) = args.file {
-        state.context.write_to_file(&path);
-    }
 }

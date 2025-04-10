@@ -4,13 +4,15 @@ use std::io::{self, Write};
 pub struct AppState {
     pub context: ContextState,
     pub interface: InterfaceState,
+    pub autosave: Option<String>,
 }
 
 impl AppState {
-    pub fn new(context: ContextState, interface: &str) -> Self {
+    pub fn new(file: Option<String>, interface: &str) -> Self {
         AppState {
-            context,
+            context: ContextState::from_optional_file(&file),
             interface: InterfaceState::new(interface),
+            autosave: file,
         }
     }
     pub fn set_interface(&mut self, interface: &str) {
@@ -22,6 +24,10 @@ impl AppState {
         match res {
             Ok(response) => {
                 self.context.chat.push(context::Message { role: context::Role::Model, text: response });
+                if let Some(file) = &self.autosave {
+                    // autosave
+                    self.context.write_to_file(&file);
+                }
             },
             Err(e) => {
                 eprintln!("{}", e);
