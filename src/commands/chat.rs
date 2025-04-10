@@ -13,16 +13,19 @@ pub struct Chat {
 
 pub async fn chat(args: Chat) {
     let mut rl = rustyline::DefaultEditor::new().unwrap();
-    let context = ContextState::from_optional_file(&args.file);
+    let mut file: Option<String> = args.file;
+    let context = ContextState::from_optional_file(&file);
     let mut state = AppState::new(context, &args.model);
     loop {
         match prompt(&mut rl) {
             UserActions::Prompt(prompt) => state.generate_to_output(prompt).await,
             UserActions::Exit => break,
             UserActions::SetModel(model) => state.set_interface(&model),
+            UserActions::Save(path) => state.context.write_to_file(&path),
+            UserActions::SetFile(path) => file = if path.is_empty() { None } else { Some(path) },
         }
     }
-    if let Some(path) = args.file {
+    if let Some(path) = file {
         state.context.write_to_file(&path);
     }
 }
