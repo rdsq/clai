@@ -26,6 +26,6 @@ pub fn prompt(rl: &mut rustyline::DefaultEditor) -> UserActions {
         "/exit" => UserActions::Exit,
         "/fromfile" => UserActions::PromptFromFile(content),
         "/status" => UserActions::Status,
-        _ => UserActions::Prompt(content),
+        _ => UserActions::Prompt(inp),
     }
 }
