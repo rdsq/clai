@@ -1,4 +1,4 @@
-mod app_state;
+mod states;
 mod interfaces;
 mod parse_model;
 mod get_interface;

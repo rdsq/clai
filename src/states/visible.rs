@@ -8,12 +8,12 @@ pub struct Message {
     pub text: String,
 }
 
-pub struct AppState {
+pub struct VisibleState {
     pub chat: Vec<Message>,
 }
 
-impl AppState {
+impl VisibleState {
     pub fn new() -> Self {
-        AppState { chat: Vec::new() }
+        Self { chat: Vec::new() }
     }
 }

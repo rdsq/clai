@@ -1,4 +1,4 @@
-use crate::app_state;
+use crate::states::{AppState, visible};
 use std::io::{self, Write};
 
 #[derive(clap::Parser, Debug)]
@@ -11,20 +11,19 @@ pub struct Generate {
 }
 
 pub async fn generate(args: Generate) {
-    let interface = crate::get_interface::get_interface(&args.model);
-    let mut state = app_state::AppState::new();
-    state.chat.push(app_state::Message { role: app_state::Role::User, text: args.prompt });
+    let mut state = AppState::new(&args.model);
+    state.visible.chat.push(visible::Message { role: visible::Role::User, text: args.prompt });
     let callback = Box::new(|chunk: String| {
         print!("{}", chunk);
         io::stdout().flush().unwrap();
     });
-    let res = interface.generate(&state, Box::new(callback)).await;
+    let res = state.interface.interface.generate(&state.visible, Box::new(callback)).await;
     match res {
         Ok(response) => {
             if !response.ends_with("\n") {
                 println!();
             }
-            state.chat.push(app_state::Message { role: app_state::Role::Model, text: response });
+            state.visible.chat.push(visible::Message { role: visible::Role::Model, text: response });
         },
         Err(e) => {
             eprintln!("{}", e);
