@@ -6,6 +6,12 @@ pub struct OllamaInterface {
     pub model: String,
 }
 
+impl OllamaInterface {
+    pub fn new(model: String) -> Self {
+        Self { model }
+    }
+}
+
 #[derive(Serialize)]
 struct OllamaMessage {
     role: String,
@@ -13,24 +19,13 @@ struct OllamaMessage {
 }
 
 fn prepare_chat(chat: &Vec<crate::app_state::Message>) -> Vec<OllamaMessage> {
-    let mut new_chat: Vec<OllamaMessage> = Vec::new();
-    for msg in chat {
-        match msg.role {
-            crate::app_state::Role::User => {
-                new_chat.push(OllamaMessage {
-                    role: String::from("user"),
-                    content: msg.text.clone(),
-                });
-            }
-            crate::app_state::Role::Model => {
-                new_chat.push(OllamaMessage {
-                    role: String::from("assistant"),
-                    content: msg.text.clone(),
-                });
-            }
-        }
-    }
-    new_chat
+    return chat.into_iter().map(|msg| OllamaMessage {
+        role: match msg.role {
+            crate::app_state::Role::User => "user".to_string(),
+            crate::app_state::Role::Model => "assistant".to_string(),
+        },
+        content: msg.text.clone(),
+    }).collect();
 }
 
 #[derive(Serialize)]
