@@ -4,3 +4,4 @@ Commands:
     /setfile [FILE]: set where to save the chat. Can also be used to remove it if called without arguments
     /exit: exit the chat, alternatively to ^D
     /fromfile <FILE>: use file's contents as the user prompt
+    /status: show the current model, messages number, and autosave file

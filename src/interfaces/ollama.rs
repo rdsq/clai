@@ -62,4 +62,7 @@ impl frame::Interface for OllamaInterface {
         }
         Ok(full)
     }
+    fn model_id(&self) -> String {
+        format!("ollama:{}", self.model)
+    }
 }

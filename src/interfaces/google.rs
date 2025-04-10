@@ -78,4 +78,7 @@ impl frame::Interface for GoogleGenAIInterface {
             return Err("unknown response format".into());
         }
     }
+    fn model_id(&self) -> String {
+        format!("google:{}", self.model)
+    }
 }

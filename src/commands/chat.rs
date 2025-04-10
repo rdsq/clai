@@ -11,6 +11,15 @@ pub struct Chat {
     file: Option<String>,
 }
 
+fn print_status(state: &AppState, file: &Option<String>) {
+    println!("Model: {}", state.interface.interface.model_id());
+    println!("Messages number: {}", state.context.chat.len());
+    println!("Autosave file: {}", match file {
+        Some(path) => &path,
+        None => "[not set]",
+    });
+}
+
 pub async fn chat(args: Chat) {
     let mut rl = rustyline::DefaultEditor::new().unwrap();
     let mut file: Option<String> = args.file;
@@ -31,6 +40,7 @@ pub async fn chat(args: Chat) {
                     std::process::exit(1);
                 })
             ).await,
+            UserActions::Status => print_status(&state, &file),
         }
     }
     if let Some(path) = file {
