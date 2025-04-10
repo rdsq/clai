@@ -5,6 +5,7 @@ pub enum UserActions {
     Save(String),
     SetFile(String),
     Help,
+    PromptFromFile(String),
 }
 
 pub fn prompt(rl: &mut rustyline::DefaultEditor) -> UserActions {
@@ -22,6 +23,7 @@ pub fn prompt(rl: &mut rustyline::DefaultEditor) -> UserActions {
         "/save" => UserActions::Save(content),
         "/setfile" => UserActions::SetFile(content),
         "/exit" => UserActions::Exit,
+        "/fromfile" => UserActions::PromptFromFile(content),
         _ => UserActions::Prompt(content),
     }
 }

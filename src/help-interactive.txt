@@ -1,5 +1,6 @@
 Commands:
-    /setmodel <INTERFACE:MODEL> : change the model on the fly
+    /setmodel <INTERFACE:MODEL>: change the model on the fly
     /save <FILE>: save the chat session to a file
     /setfile [FILE]: set where to save the chat. Can also be used to remove it if called without arguments
     /exit: exit the chat, alternatively to ^D
+    /fromfile <FILE>: use file's contents as the user prompt

@@ -24,6 +24,13 @@ pub async fn chat(args: Chat) {
             UserActions::Save(path) => state.context.write_to_file(&path),
             UserActions::SetFile(path) => file = if path.is_empty() { None } else { Some(path) },
             UserActions::Help => print!(include_str!("../help-interactive.txt")),
+            UserActions::PromptFromFile(path) => state.generate_to_output(
+                std::fs::read_to_string(path)
+                .unwrap_or_else(|e| {
+                    eprintln!("{}", e);
+                    std::process::exit(1);
+                })
+            ).await,
         }
     }
     if let Some(path) = file {
