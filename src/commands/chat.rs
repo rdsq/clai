@@ -1,7 +1,7 @@
 use crate::states::{AppState, ContextState};
 
 #[derive(clap::Parser, Debug)]
-/// Generate a response
+/// Chat with a chatbot
 pub struct Chat {
     // The model to chat with
     model: String,
