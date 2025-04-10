@@ -13,10 +13,7 @@ pub struct Generate {
 }
 
 pub async fn generate(args: Generate) {
-    let context = match &args.file {
-        Some(path) => ContextState::from_file(&path, true),
-        None => ContextState::new()
-    };
+    let context = ContextState::from_optional_file(&args.file);
     let mut state = AppState::new(context, &args.model);
     state.generate_to_output(args.prompt).await;
     if let Some(path) = args.file {

@@ -25,6 +25,13 @@ impl ContextState {
     pub fn new() -> Self {
         Self { chat: Vec::new() }
     }
+    pub fn from_optional_file(file: &Option<String>) -> Self {
+        if let Some(path) = file {
+            Self::from_file(&path, true)
+        } else {
+            Self::new()
+        }
+    }
     pub fn from_file(path: &str, allow_not_existing: bool) -> Self {
         let contents = fs::read_to_string(path);
         if let Err(err) = contents {
