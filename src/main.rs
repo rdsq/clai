@@ -18,6 +18,7 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     Gen(commands::generate::Generate),
+    Chat(commands::chat::Chat),
 }
 
 #[tokio::main]
@@ -26,5 +27,6 @@ async fn main() {
 
     match cli.command {
         Commands::Gen(args) => commands::generate::generate(args).await,
+        Commands::Chat(args) => commands::chat::chat(args).await,
     }
 }
