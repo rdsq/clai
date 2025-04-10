@@ -4,6 +4,7 @@ use serde_json;
 use std::io::Write;
 
 #[derive(Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
 pub enum Role {
     User,
     Model,
