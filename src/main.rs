@@ -1,7 +1,5 @@
 mod states;
 mod interfaces;
-mod parse_model;
-mod get_interface;
 mod commands;
 mod prompt;
 
