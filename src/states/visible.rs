@@ -17,3 +17,14 @@ impl VisibleState {
         Self { chat: Vec::new() }
     }
 }
+
+impl Message {
+    pub fn ends_with_nl(&self) -> bool {
+        self.text.ends_with("\n")
+    }
+    pub fn compensate_nl(&self) {
+        if !self.ends_with_nl() {
+            println!(); // add a new line
+        }
+    }
+}

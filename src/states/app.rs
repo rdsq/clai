@@ -32,8 +32,6 @@ impl AppState {
             io::stdout().flush().unwrap();
         });
         self.generate(prompt, callback).await;
-        if !self.visible.chat.last().unwrap().text.ends_with("\n") {
-            println!(); // new line
-        }
+        self.visible.chat.last().unwrap().compensate_nl();
     }
 }
