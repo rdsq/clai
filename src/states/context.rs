@@ -1,13 +1,18 @@
+use serde::{Serialize, Deserialize};
+
+#[derive(Serialize, Deserialize)]
 pub enum Role {
     User,
     Model,
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct Message {
     pub role: Role,
     pub text: String,
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct ContextState {
     pub chat: Vec<Message>,
 }

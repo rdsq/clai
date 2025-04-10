@@ -7,9 +7,9 @@ pub struct AppState {
 }
 
 impl AppState {
-    pub fn new(interface: &str) -> Self {
+    pub fn new(context: ContextState, interface: &str) -> Self {
         AppState {
-            context: ContextState::new(),
+            context,
             interface: InterfaceState::new(interface),
         }
     }
