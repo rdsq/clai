@@ -44,6 +44,7 @@ pub async fn chat(args: Chat) {
                 state.context.chat.pop(); // user prompt
                 state.try_autosave();
             },
+            UserActions::Rewind(num) => state.context.rewind(&num),
         }
     }
 }

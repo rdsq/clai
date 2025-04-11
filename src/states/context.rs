@@ -55,4 +55,16 @@ impl ContextState {
                 std::process::exit(1);
             });
     }
+    pub fn rewind(&self, num: &Option<usize>) {
+        let mut start_index = 0;
+        let len = self.chat.len();
+        if let Some(custom) = num {
+            if *custom < len {
+                start_index = len - custom;
+            }
+        }
+        for i in start_index..len {
+            self.chat[i].print();
+        }
+    }
 }

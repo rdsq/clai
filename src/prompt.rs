@@ -8,6 +8,7 @@ pub enum UserActions {
     PromptFromFile(String),
     Status,
     DeleteLast,
+    Rewind(Option<usize>),
 }
 
 pub fn prompt(rl: &mut rustyline::DefaultEditor) -> UserActions {
@@ -28,6 +29,16 @@ pub fn prompt(rl: &mut rustyline::DefaultEditor) -> UserActions {
         "/fromfile" => UserActions::PromptFromFile(content),
         "/status" => UserActions::Status,
         "/nvm" => UserActions::DeleteLast,
+        "/rewind" => {
+            if content == cmd { // according to the split logic
+                UserActions::Rewind(None)
+            } else {
+                UserActions::Rewind(Some(content.parse().unwrap_or_else(|err| {
+                    eprintln!("Error while parsing the number: {}", err);
+                    std::process::exit(1);
+                })))
+            }
+        },
         _ => UserActions::Prompt(inp),
     }
 }
