@@ -7,6 +7,15 @@ pub enum Role {
     Model,
 }
 
+impl Role {
+    pub fn to_user_string(&self) -> String {
+        return match self {
+            Self::User => "User",
+            Self::Model => "Model",
+        }.to_string();
+    }
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct Message {
     pub role: Role,
@@ -21,5 +30,9 @@ impl Message {
         if !self.ends_with_nl() {
             println!(); // add a new line
         }
+    }
+    pub fn print(&self) {
+        print!("\x1b[36;1m{}:\x1b[0m {}", self.role.to_user_string(), self.text);
+        self.compensate_nl();
     }
 }
