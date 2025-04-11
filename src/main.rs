@@ -19,6 +19,7 @@ enum Commands {
     Gen(commands::generate::Generate),
     Chat(commands::chat::Chat),
     Read(commands::read::Read),
+    ModelWithModel(commands::model_with_model::ModelWithModel),
 }
 
 #[tokio::main]
@@ -29,5 +30,6 @@ async fn main() {
         Commands::Gen(args) => commands::generate::generate(args).await,
         Commands::Chat(args) => commands::chat::chat(args).await,
         Commands::Read(args) => commands::read::read(args),
+        Commands::ModelWithModel(args) => commands::model_with_model::model_with_model(args).await,
     }
 }
