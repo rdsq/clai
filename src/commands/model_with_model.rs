@@ -16,19 +16,27 @@ pub async fn model_with_model(args: ModelWithModel) {
     let mut state1 = AppState::new(None, &args.model1);
     let mut state2 = AppState::new(None, &args.model2.unwrap_or(args.model1));
     // the start message
-    state1.context.chat.push(messages::Message {
+    let msg = messages::Message {
         role: messages::Role::Model,
         text: args.prompt,
-    });
+    };
     let names_are_same = state1.interface.interface.model_id() == state2.interface.interface.model_id();
+    fn model_name(name: String, state: &AppState, names_are_same: &bool) {
+        print!("\x1b[36;1m{}:\x1b[0m ", if *names_are_same {
+            name
+        } else {
+            format!("{} ({})", name, state.interface.interface.model_id())
+        });
+    }
+    model_name("Model 1".to_string(), &state1, &names_are_same);
+    print!("{}", msg.text);
+    msg.compensate_nl();
     let mut is_first = false;
+    state1.context.chat.push(msg);
     loop {
-        let (main_state, secondary_state, mut name) = if is_first { (&mut state1, &state2, "Model 1".to_string()) } else { (&mut state2, &state1, "Model 2".to_string()) };
+        let (main_state, secondary_state, name) = if is_first { (&mut state1, &state2, "Model 1".to_string()) } else { (&mut state2, &state1, "Model 2".to_string()) };
         is_first = !is_first;
-        if !names_are_same {
-            name.push_str(&format!(" ({})", main_state.interface.interface.model_id()));
-        }
-        print!("\x1b[36;1m{}:\x1b[0m ", name);
+        model_name(name, &main_state, &names_are_same);
         io::stdout().flush().unwrap();
         let prompt = secondary_state.context.chat.last().unwrap().text.clone();
         main_state.generate_to_output(prompt).await;
