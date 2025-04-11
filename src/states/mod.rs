@@ -1,4 +1,5 @@
-pub mod context;
+pub mod messages;
+mod context;
 mod interface;
 mod app;
 

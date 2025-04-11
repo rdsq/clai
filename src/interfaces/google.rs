@@ -1,6 +1,6 @@
 use serde::Serialize;
 use crate::interfaces::frame;
-use crate::states::context;
+use crate::states::{messages, ContextState};
 
 pub struct GoogleGenAIInterface {
     pub model: String,
@@ -34,11 +34,11 @@ struct GoogleGenAIMessage {
     parts: Vec<MessageParts>,
 }
 
-fn prepare_chat(chat: &Vec<context::Message>) -> Vec<GoogleGenAIMessage> {
+fn prepare_chat(chat: &Vec<messages::Message>) -> Vec<GoogleGenAIMessage> {
     return chat.into_iter().map(|msg| GoogleGenAIMessage {
         role: match msg.role {
-            context::Role::User => "user".to_string(),
-            context::Role::Model => "model".to_string(),
+            messages::Role::User => "user".to_string(),
+            messages::Role::Model => "model".to_string(),
         },
         parts: vec![MessageParts { text: msg.text.clone() }],
     }).collect();
@@ -51,7 +51,7 @@ struct GoogleGenAIRequest {
 
 #[async_trait::async_trait]
 impl frame::Interface for GoogleGenAIInterface {
-    async fn generate(&self, state: &context::ContextState, callback: Box<dyn Fn(String) -> () + Send>) -> Result<String, Box<dyn std::error::Error>> {
+    async fn generate(&self, state: &ContextState, callback: Box<dyn Fn(String) -> () + Send>) -> Result<String, Box<dyn std::error::Error>> {
         let client = reqwest::Client::new();
         let text = client
             .post(&self.get_endpoint())

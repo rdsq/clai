@@ -1,7 +1,7 @@
 use serde::Serialize;
 use crate::interfaces::frame;
 use futures_util::StreamExt;
-use crate::states::context;
+use crate::states::{messages, ContextState};
 
 pub struct OllamaInterface {
     pub model: String,
@@ -19,11 +19,11 @@ struct OllamaMessage {
     content: String,
 }
 
-fn prepare_chat(chat: &Vec<context::Message>) -> Vec<OllamaMessage> {
+fn prepare_chat(chat: &Vec<messages::Message>) -> Vec<OllamaMessage> {
     return chat.into_iter().map(|msg| OllamaMessage {
         role: match msg.role {
-            context::Role::User => "user".to_string(),
-            context::Role::Model => "assistant".to_string(),
+            messages::Role::User => "user".to_string(),
+            messages::Role::Model => "assistant".to_string(),
         },
         content: msg.text.clone(),
     }).collect();
@@ -38,7 +38,7 @@ struct OllamaRequest {
 
 #[async_trait::async_trait]
 impl frame::Interface for OllamaInterface {
-    async fn generate(&self, state: &context::ContextState, callback: Box<dyn Fn(String) -> () + Send>) -> Result<String, Box<dyn std::error::Error>> {
+    async fn generate(&self, state: &ContextState, callback: Box<dyn Fn(String) -> () + Send>) -> Result<String, Box<dyn std::error::Error>> {
         let client = reqwest::Client::new();
         let res = client
             .post("http://localhost:11434/api/chat")

@@ -1,4 +1,4 @@
-use super::{ContextState, InterfaceState, context};
+use super::{ContextState, InterfaceState, messages};
 use std::io::{self, Write};
 
 pub struct AppState {
@@ -24,11 +24,11 @@ impl AppState {
         self.interface = InterfaceState::new(interface);
     }
     pub async fn generate(&mut self, prompt: String, callback: Box<dyn Fn(String) -> () + Send>) {
-        self.context.chat.push(context::Message { role: context::Role::User, text: prompt });
+        self.context.chat.push(messages::Message { role: messages::Role::User, text: prompt });
         let res = self.interface.interface.generate(&self.context, callback).await;
         match res {
             Ok(response) => {
-                self.context.chat.push(context::Message { role: context::Role::Model, text: response });
+                self.context.chat.push(messages::Message { role: messages::Role::Model, text: response });
                 self.try_autosave();
             },
             Err(e) => {
