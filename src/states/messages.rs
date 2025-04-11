@@ -1,4 +1,5 @@
 use serde::{Serialize, Deserialize};
+use crate::markdown::markdown_to_ansi;
 
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -32,7 +33,7 @@ impl Message {
         }
     }
     pub fn print(&self) {
-        print!("{}", self.text);
+        print!("{}", markdown_to_ansi(&self.text));
         self.compensate_nl();
     }
     pub fn print_with_role(&self) {

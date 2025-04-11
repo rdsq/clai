@@ -1,6 +1,7 @@
 use serde::Serialize;
 use crate::interfaces::frame;
 use crate::states::{messages, ContextState};
+use crate::markdown::markdown_to_ansi;
 
 pub struct GoogleGenAIInterface {
     pub model: String,
@@ -72,7 +73,7 @@ impl frame::Interface for GoogleGenAIInterface {
             .and_then(|v| v.get(0))
             .and_then(|v| v.get("text"))
             .and_then(|v| v.as_str()) {
-            callback(message.to_string());
+            callback(markdown_to_ansi(message));
             return Ok(message.to_string());
         } else {
             return Err("unknown response format".into());
