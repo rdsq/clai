@@ -39,6 +39,11 @@ pub async fn chat(args: Chat) {
                 })
             ).await,
             UserActions::Status => print_status(&state),
+            UserActions::DeleteLast => {
+                state.context.chat.pop(); // model response
+                state.context.chat.pop(); // user prompt
+                state.try_autosave();
+            },
         }
     }
 }

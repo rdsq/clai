@@ -5,3 +5,4 @@ Commands:
     /exit: exit the chat, alternatively to ^D
     /fromfile <FILE>: use file's contents as the user prompt
     /status: show the current model, messages number, and autosave file
+    /nvm: delete the last model response and user prompt pair

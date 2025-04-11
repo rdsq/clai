@@ -15,6 +15,11 @@ impl AppState {
             autosave: file,
         }
     }
+    pub fn try_autosave(&self) {
+        if let Some(file) = &self.autosave {
+            self.context.write_to_file(&file);
+        }
+    }
     pub fn set_interface(&mut self, interface: &str) {
         self.interface = InterfaceState::new(interface);
     }
@@ -24,10 +29,7 @@ impl AppState {
         match res {
             Ok(response) => {
                 self.context.chat.push(context::Message { role: context::Role::Model, text: response });
-                if let Some(file) = &self.autosave {
-                    // autosave
-                    self.context.write_to_file(&file);
-                }
+                self.try_autosave();
             },
             Err(e) => {
                 eprintln!("{}", e);

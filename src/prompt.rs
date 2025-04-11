@@ -7,6 +7,7 @@ pub enum UserActions {
     Help,
     PromptFromFile(String),
     Status,
+    DeleteLast,
 }
 
 pub fn prompt(rl: &mut rustyline::DefaultEditor) -> UserActions {
@@ -26,6 +27,7 @@ pub fn prompt(rl: &mut rustyline::DefaultEditor) -> UserActions {
         "/exit" => UserActions::Exit,
         "/fromfile" => UserActions::PromptFromFile(content),
         "/status" => UserActions::Status,
+        "/nvm" => UserActions::DeleteLast,
         _ => UserActions::Prompt(inp),
     }
 }
