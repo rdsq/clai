@@ -32,7 +32,11 @@ impl Message {
         }
     }
     pub fn print(&self) {
-        print!("\x1b[36;1m{}:\x1b[0m {}", self.role.to_user_string(), self.text);
+        print!("{}", self.text);
         self.compensate_nl();
+    }
+    pub fn print_with_role(&self) {
+        print!("\x1b[36;1m{}:\x1b[0m ", self.role.to_user_string());
+        self.print();
     }
 }

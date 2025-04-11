@@ -64,7 +64,7 @@ impl ContextState {
             }
         }
         for i in start_index..len {
-            self.chat[i].print();
+            self.chat[i].print_with_role();
         }
     }
 }

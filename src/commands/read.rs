@@ -10,6 +10,6 @@ pub struct Read {
 pub fn read(args: Read) {
     let state = ContextState::from_file(&args.file, false);
     for message in state.chat {
-        message.print();
+        message.print_with_role();
     }
 }

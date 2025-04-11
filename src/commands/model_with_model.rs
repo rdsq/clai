@@ -29,8 +29,7 @@ pub async fn model_with_model(args: ModelWithModel) {
         });
     }
     model_name("Model 1".to_string(), &state1, &names_are_same);
-    print!("{}", msg.text);
-    msg.compensate_nl();
+    msg.print();
     let mut is_first = false;
     state1.context.chat.push(msg);
     loop {
