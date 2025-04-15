@@ -10,7 +10,7 @@ pub struct SemanticSearch {
     /// The items to search from
     items: Vec<String>,
     /// How many top results to show
-    #[arg(short, long, default_value = "5")]
+    #[arg(short, long, default_value = "10")]
     show: usize,
     /// Treat the items as file paths
     #[arg(short, long)]
