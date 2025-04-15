@@ -12,6 +12,12 @@ pub struct SemanticSearch {
     /// How many top results to show
     #[arg(short, long, default_value = "3")]
     show: usize,
+    /// Treat the items as file paths
+    #[arg(short, long)]
+    files: bool,
+    /// Show the similarity numbers
+    #[arg(short, long)]
+    verbose: bool,
 }
 
 fn cosine_similarity(a: &[f32], b: &[f32]) -> f32 {
@@ -24,7 +30,16 @@ fn cosine_similarity(a: &[f32], b: &[f32]) -> f32 {
 pub async fn semantic_search(args: SemanticSearch) {
     let state = InterfaceState::new(&args.model);
     let mut inputs = vec![args.prompt];
-    inputs.extend(args.items);
+    if args.files {
+        for path in &args.items {
+            inputs.push(std::fs::read_to_string(&path).unwrap_or_else(|err| {
+                eprintln!("Error while reading \"{}\": {}", path, err);
+                std::process::exit(1);
+            }));
+        }
+    } else {
+        inputs.extend(args.items.clone());
+    }
     let resp = state.interface.embeddings(&inputs).await
         .unwrap_or_else(|err| {
             eprintln!("{}", err);
@@ -33,10 +48,15 @@ pub async fn semantic_search(args: SemanticSearch) {
     let prompt_score = &resp[0];
     let mut results: Vec<(String, f32)> = Vec::new();
     for i in 1..inputs.len() {
-        results.push((inputs[i].clone(), cosine_similarity(&prompt_score, &resp[i])));
+        // show filenames if files, not contents
+        results.push((args.items[i-1].clone(), cosine_similarity(&prompt_score, &resp[i])));
     }
     results.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
     for i in 0..std::cmp::min(results.len(), args.show) {
-        println!("{}: {}", i + 1, results[i].0);
+        if args.verbose {
+            println!("{} ({}): {}", i + 1, results[i].1, results[i].0);
+        } else {
+            println!("{}: {}", i + 1, results[i].0);
+        }
     }
 }
