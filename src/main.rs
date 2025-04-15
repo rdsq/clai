@@ -21,6 +21,7 @@ enum Commands {
     Chat(commands::chat::Chat),
     Read(commands::read::Read),
     ModelWithModel(commands::model_with_model::ModelWithModel),
+    Semsearch(commands::semantic_search::SemanticSearch),
 }
 
 #[tokio::main]
@@ -32,5 +33,6 @@ async fn main() {
         Commands::Chat(args) => commands::chat::chat(args).await,
         Commands::Read(args) => commands::read::read(args),
         Commands::ModelWithModel(args) => commands::model_with_model::model_with_model(args).await,
+        Commands::Semsearch(args) => commands::semantic_search::semantic_search(args).await,
     }
 }
