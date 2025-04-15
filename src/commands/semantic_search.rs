@@ -54,9 +54,9 @@ pub async fn semantic_search(args: SemanticSearch) {
     results.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
     for i in 0..std::cmp::min(results.len(), args.show) {
         if args.verbose {
-            println!("{} ({}): {}", i + 1, results[i].1, results[i].0);
+            println!("{} ({}). {}", i + 1, results[i].1, results[i].0);
         } else {
-            println!("{}: {}", i + 1, results[i].0);
+            println!("{}. {}", i + 1, results[i].0);
         }
     }
 }
