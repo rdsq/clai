@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
 use crate::interfaces::frame;
 use futures_util::StreamExt;
 use crate::states::{messages, ContextState};
@@ -36,6 +36,17 @@ struct OllamaRequest {
     stream: bool,
 }
 
+#[derive(Serialize)]
+struct OllamaEmbeddingRequest<'a> {
+    model: &'a str,
+    input: &'a Vec<&'a str>,
+}
+
+#[derive(Deserialize)]
+struct OllamaEmbeddingResponse {
+    embeddings: Vec<Vec<f32>>,
+}
+
 #[async_trait::async_trait]
 impl frame::Interface for OllamaInterface {
     async fn generate(&self, state: &ContextState, callback: Box<dyn Fn(String) -> () + Send>) -> Result<String, Box<dyn std::error::Error>> {
@@ -64,5 +75,21 @@ impl frame::Interface for OllamaInterface {
     }
     fn model_id(&self) -> String {
         format!("ollama:{}", self.model)
+    }
+    async fn embeddings(&self, input: &Vec<String>) -> Result<Vec<Vec<f32>>, Box<dyn std::error::Error>> {
+        let client = reqwest::Client::new();
+        let res = client
+            .post("http://localhost:11434/api/embed")
+            .json(&OllamaEmbeddingRequest {
+                model: &self.model,
+                input: &input.into_iter().map(|v| if v.is_empty() {
+                    " " // non empty placeholder to not mess up the order
+                } else { v }).collect(),
+            })
+            .send()
+            .await?
+            .error_for_status()?;
+        let obj: OllamaEmbeddingResponse = serde_json::from_str(&res.text().await?)?;
+        Ok(obj.embeddings)
     }
 }

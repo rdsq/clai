@@ -82,4 +82,7 @@ impl frame::Interface for GoogleGenAIInterface {
     fn model_id(&self) -> String {
         format!("google:{}", self.model)
     }
+    async fn embeddings(&self, _input: &Vec<String>) -> Result<Vec<Vec<f32>>, Box<dyn std::error::Error>> {
+        unimplemented!();
+    }
 }
