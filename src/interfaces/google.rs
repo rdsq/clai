@@ -1,4 +1,4 @@
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
 use crate::interfaces::frame;
 use crate::states::{messages, ContextState};
 use crate::markdown::markdown_to_ansi;
@@ -22,17 +22,23 @@ impl GoogleGenAIInterface {
     fn get_endpoint(&self) -> String {
         format!("https://generativelanguage.googleapis.com/v1/models/{}:generateContent?key={}", self.model, self.api_key)
     }
+    fn get_embed_endpoint(&self) -> String {
+        format!("https://generativelanguage.googleapis.com/v1beta/models/{}:batchEmbedContents?key={}", self.model, self.api_key)
+    }
+    fn model_bullshit(&self) -> String {
+        format!("models/{}", self.model)
+    }
 }
 
 #[derive(Serialize)]
-struct MessageParts {
-    text: String,
+struct MessageParts<'a> {
+    text: &'a str,
 }
 
 #[derive(Serialize)]
-struct GoogleGenAIMessage {
+struct GoogleGenAIMessage<'a> {
     role: String,
-    parts: Vec<MessageParts>,
+    parts: Vec<MessageParts<'a>>,
 }
 
 fn prepare_chat(chat: &Vec<messages::Message>) -> Vec<GoogleGenAIMessage> {
@@ -41,13 +47,40 @@ fn prepare_chat(chat: &Vec<messages::Message>) -> Vec<GoogleGenAIMessage> {
             messages::Role::User => "user".to_string(),
             messages::Role::Model => "model".to_string(),
         },
-        parts: vec![MessageParts { text: msg.text.clone() }],
+        parts: vec![MessageParts { text: &msg.text }],
     }).collect();
 }
 
 #[derive(Serialize)]
-struct GoogleGenAIRequest {
-    contents: Vec<GoogleGenAIMessage>,
+struct GoogleGenAIRequest<'a> {
+    contents: Vec<GoogleGenAIMessage<'a>>,
+}
+
+#[derive(Deserialize)]
+struct GoogleGenAIEmbedPrediction {
+    values: Vec<f32>,
+}
+
+#[derive(Serialize)]
+struct GoogleGenAIEmbedBullshit<'a> {
+    parts: Vec<MessageParts<'a>>,
+}
+
+#[derive(Serialize)]
+struct GoogleGenAIEmbedItem<'a> {
+    model: String,
+    content: GoogleGenAIEmbedBullshit<'a>,
+}
+
+#[derive(Serialize)]
+struct GoogleGenAIEmbedRequest<'a> {
+    model: String,
+    requests: Vec<GoogleGenAIEmbedItem<'a>>,
+}
+
+#[derive(Deserialize)]
+struct GoogleGenAIEmbedResponse {
+    embeddings: Vec<GoogleGenAIEmbedPrediction>,
 }
 
 #[async_trait::async_trait]
@@ -82,7 +115,29 @@ impl frame::Interface for GoogleGenAIInterface {
     fn model_id(&self) -> String {
         format!("google:{}", self.model)
     }
-    async fn embeddings(&self, _input: &Vec<String>) -> Result<Vec<Vec<f32>>, Box<dyn std::error::Error>> {
-        unimplemented!();
+    async fn embeddings(&self, input: &Vec<String>) -> Result<Vec<Vec<f32>>, Box<dyn std::error::Error>> {
+        let client = reqwest::Client::new();
+        let text = client
+            .post(&self.get_embed_endpoint())
+            .json(&GoogleGenAIEmbedRequest {
+                model: self.model_bullshit(),
+                requests: input.iter().map(|v| GoogleGenAIEmbedItem {
+                    content: GoogleGenAIEmbedBullshit {
+                        parts: vec![MessageParts {
+                            text: v,
+                        }],
+                    },
+                    model: self.model_bullshit(),
+                }).collect(),
+            })
+            .send()
+            .await?
+            .error_for_status()?
+            .text()
+            .await?;
+        let obj: GoogleGenAIEmbedResponse = serde_json::from_str(&text)?;
+        Ok(obj.embeddings.iter()
+            .map(|v| v.values.to_owned())
+            .collect())
     }
 }
