@@ -18,6 +18,9 @@ pub struct SemanticSearch {
     /// Show the similarity numbers
     #[arg(short, long)]
     verbose: bool,
+    /// Parse every argument as a pre embedded string
+    #[arg(short, long)]
+    pre: bool,
 }
 
 fn cosine_similarity(a: &[f32], b: &[f32]) -> f32 {
@@ -27,30 +30,67 @@ fn cosine_similarity(a: &[f32], b: &[f32]) -> f32 {
     dot / (norm_a * norm_b)
 }
 
-pub async fn semantic_search(args: SemanticSearch) {
-    let state = InterfaceState::new(&args.model);
-    let mut inputs = vec![args.prompt];
-    if args.files {
-        for path in &args.items {
-            inputs.push(std::fs::read_to_string(&path).unwrap_or_else(|err| {
+fn parse_pre(item: &str) -> Result<(String, Vec<f32>), Box<dyn std::error::Error>> {
+    let (seq, name) = item.split_once(' ')
+        .ok_or("failed to split by whitespace")?;
+    let mut parsed = Vec::new();
+    for i in seq.split(',') {
+        parsed.push(i.parse::<f32>()?);
+    }
+    Ok((name.to_string(), parsed))
+}
+
+async fn get_embeddings(state: &InterfaceState, items: &Vec<String>, files: &bool, pre: &bool) -> (Vec<String>, Vec<Vec<f32>>) {
+    let mut names_vec = Vec::new();
+    let mut embeds_vec = Vec::new();
+    if *pre {
+        for (i, item) in items.iter().enumerate() {
+            let (name, parsed) = parse_pre(&item)
+                .unwrap_or_else(|err| {
+                    eprintln!("Error while parsing item {}: {}", i+1, err);
+                    std::process::exit(1);
+                });
+            names_vec.push(name);
+            embeds_vec.push(parsed);
+        }
+    } else if *files {
+        let mut values = Vec::new();
+        for path in items {
+            values.push(std::fs::read_to_string(&path).unwrap_or_else(|err| {
                 eprintln!("Error while reading \"{}\": {}", path, err);
                 std::process::exit(1);
             }));
         }
+        names_vec.extend(items.clone());
+        let embeddings = state.interface.embeddings(&values).await
+            .unwrap_or_else(|err| {
+                eprintln!("{}", err);
+                std::process::exit(1);
+            });
+        embeds_vec.extend(embeddings);
     } else {
-        inputs.extend(args.items.clone());
+        let embeddings = state.interface.embeddings(&items).await
+            .unwrap_or_else(|err| {
+                eprintln!("{}", err);
+                std::process::exit(1);
+            });
+        embeds_vec.extend(embeddings);
+        names_vec.extend(items.clone());
     }
-    let resp = state.interface.embeddings(&inputs).await
+    (names_vec, embeds_vec)
+}
+
+pub async fn semantic_search(args: SemanticSearch) {
+    let state = InterfaceState::new(&args.model);
+    let (names, embeds) = get_embeddings(&state, &args.items, &args.files, &args.pre).await;
+    let prompt_score = &state.interface.embeddings(&vec![args.prompt]).await
         .unwrap_or_else(|err| {
-            eprintln!("{}", err);
+            eprintln!("Error while embedding prompt: {}", err);
             std::process::exit(1);
-        });
-    let prompt_score = &resp[0];
-    let mut results: Vec<(String, f32)> = Vec::new();
-    for i in 1..inputs.len() {
-        // show filenames if files, not contents
-        results.push((args.items[i-1].clone(), cosine_similarity(&prompt_score, &resp[i])));
-    }
+        })[0];
+    let mut results: Vec<(&String, f32)> = names.iter()
+        .zip(embeds.iter().map(|e| cosine_similarity(&prompt_score, &e)))
+        .collect();
     results.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
     for i in 0..std::cmp::min(results.len(), args.show) {
         if args.verbose {
