@@ -1,5 +1,5 @@
 use serde::Serialize;
-use super::MessageParts;
+use super::message_parts::MessageParts;
 use crate::states::messages;
 
 #[derive(Serialize)]

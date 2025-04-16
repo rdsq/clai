@@ -1,9 +1,4 @@
-use serde::Serialize;
-
-#[derive(Serialize)]
-pub struct MessageParts<'a> {
-    pub text: &'a str,
-}
-
+pub mod message_parts;
 pub mod generate;
+pub mod gen_response;
 pub mod embed;

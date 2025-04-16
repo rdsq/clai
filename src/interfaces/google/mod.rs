@@ -43,20 +43,10 @@ impl frame::Interface for GoogleGenAIInterface {
             .error_for_status()?
             .text()
             .await?;
-        let obj: serde_json::Value = serde_json::from_str(&text)?;
-        if let Some(message) = obj
-            .get("candidates")
-            .and_then(|v| v.get(0))
-            .and_then(|v| v.get("content"))
-            .and_then(|v| v.get("parts"))
-            .and_then(|v| v.get(0))
-            .and_then(|v| v.get("text"))
-            .and_then(|v| v.as_str()) {
-            callback(markdown_to_ansi(message));
-            return Ok(message.to_string());
-        } else {
-            return Err("unknown response format".into());
-        }
+        let obj: data_types::gen_response::GoogleGenAIResponse = serde_json::from_str(&text)?;
+        let message = obj.get_text();
+        callback(markdown_to_ansi(&message));
+        Ok(message)
     }
     fn model_id(&self) -> String {
         format!("google:{}", self.model)

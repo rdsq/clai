@@ -1,5 +1,5 @@
 use serde::{Serialize, Deserialize};
-use super::MessageParts;
+use super::message_parts::MessagePartsBullshit;
 
 #[derive(Deserialize)]
 pub struct GoogleGenAIEmbedPrediction {
@@ -7,23 +7,16 @@ pub struct GoogleGenAIEmbedPrediction {
 }
 
 #[derive(Serialize)]
-pub struct GoogleGenAIEmbedBullshit<'a> {
-    pub parts: Vec<MessageParts<'a>>,
-}
-
-#[derive(Serialize)]
 pub struct GoogleGenAIEmbedItem<'a> {
     pub model: String,
-    pub content: GoogleGenAIEmbedBullshit<'a>,
+    pub content: MessagePartsBullshit<'a>,
 }
 
 impl<'a> GoogleGenAIEmbedItem<'a> {
     pub fn new(model: String, text: &'a str) -> Self {
         Self {
             model,
-            content: GoogleGenAIEmbedBullshit {
-                parts: vec![MessageParts { text }],
-            }
+            content: MessagePartsBullshit::new(text),
         }
     }
 }
