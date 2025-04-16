@@ -1,7 +1,16 @@
-use serde::{Serialize, Deserialize};
+mod data_types;
 use crate::interfaces::frame;
 use crate::states::{messages, ContextState};
 use crate::markdown::markdown_to_ansi;
+use data_types::{
+    MessageParts,
+    GoogleGenAIMessage,
+    GoogleGenAIRequest,
+    GoogleGenAIEmbedBullshit,
+    GoogleGenAIEmbedItem,
+    GoogleGenAIEmbedRequest,
+    GoogleGenAIEmbedResponse,
+};
 
 pub struct GoogleGenAIInterface {
     pub model: String,
@@ -55,17 +64,6 @@ impl GoogleGenAIInterface {
     }
 }
 
-#[derive(Serialize)]
-struct MessageParts<'a> {
-    text: &'a str,
-}
-
-#[derive(Serialize)]
-struct GoogleGenAIMessage<'a> {
-    role: String,
-    parts: Vec<MessageParts<'a>>,
-}
-
 fn prepare_chat(chat: &Vec<messages::Message>) -> Vec<GoogleGenAIMessage> {
     return chat.into_iter().map(|msg| GoogleGenAIMessage {
         role: match msg.role {
@@ -74,38 +72,6 @@ fn prepare_chat(chat: &Vec<messages::Message>) -> Vec<GoogleGenAIMessage> {
         },
         parts: vec![MessageParts { text: &msg.text }],
     }).collect();
-}
-
-#[derive(Serialize)]
-struct GoogleGenAIRequest<'a> {
-    contents: Vec<GoogleGenAIMessage<'a>>,
-}
-
-#[derive(Deserialize)]
-struct GoogleGenAIEmbedPrediction {
-    values: Vec<f32>,
-}
-
-#[derive(Serialize)]
-struct GoogleGenAIEmbedBullshit<'a> {
-    parts: Vec<MessageParts<'a>>,
-}
-
-#[derive(Serialize)]
-struct GoogleGenAIEmbedItem<'a> {
-    model: String,
-    content: GoogleGenAIEmbedBullshit<'a>,
-}
-
-#[derive(Serialize)]
-struct GoogleGenAIEmbedRequest<'a> {
-    model: String,
-    requests: Vec<GoogleGenAIEmbedItem<'a>>,
-}
-
-#[derive(Deserialize)]
-struct GoogleGenAIEmbedResponse {
-    embeddings: Vec<GoogleGenAIEmbedPrediction>,
 }
 
 #[async_trait::async_trait]
