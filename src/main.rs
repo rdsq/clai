@@ -22,6 +22,7 @@ enum Commands {
     Read(commands::read::Read),
     ModelWithModel(commands::model_with_model::ModelWithModel),
     Semsearch(commands::semantic_search::SemanticSearch),
+    Embed(commands::embed::Embed),
 }
 
 #[tokio::main]
@@ -34,5 +35,6 @@ async fn main() {
         Commands::Read(args) => commands::read::read(args),
         Commands::ModelWithModel(args) => commands::model_with_model::model_with_model(args).await,
         Commands::Semsearch(args) => commands::semantic_search::semantic_search(args).await,
+        Commands::Embed(args) => commands::embed::embed(args).await,
     }
 }
