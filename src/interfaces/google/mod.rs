@@ -1,16 +1,9 @@
-mod data_types;
+pub mod data_types;
 use crate::interfaces::frame;
-use crate::states::{messages, ContextState};
+use crate::states::ContextState;
 use crate::markdown::markdown_to_ansi;
-use data_types::{
-    MessageParts,
-    GoogleGenAIMessage,
-    GoogleGenAIRequest,
-    GoogleGenAIEmbedBullshit,
-    GoogleGenAIEmbedItem,
-    GoogleGenAIEmbedRequest,
-    GoogleGenAIEmbedResponse,
-};
+use data_types::generate;
+mod embeds;
 
 pub struct GoogleGenAIInterface {
     pub model: String,
@@ -34,44 +27,6 @@ impl GoogleGenAIInterface {
     fn get_embed_endpoint(&self) -> String {
         format!("https://generativelanguage.googleapis.com/v1beta/models/{}:batchEmbedContents?key={}", self.model, self.api_key)
     }
-    fn model_bullshit(&self) -> String {
-        format!("models/{}", self.model)
-    }
-    async fn embeddings_at_most_100(&self, input: &Vec<String>) -> Result<Vec<Vec<f32>>, Box<dyn std::error::Error>> {
-        let client = reqwest::Client::new();
-        let text = client
-            .post(&self.get_embed_endpoint())
-            .json(&GoogleGenAIEmbedRequest {
-                model: self.model_bullshit(),
-                requests: input.iter().map(|v| GoogleGenAIEmbedItem {
-                    content: GoogleGenAIEmbedBullshit {
-                        parts: vec![MessageParts {
-                            text: v,
-                        }],
-                    },
-                    model: self.model_bullshit(),
-                }).collect(),
-            })
-            .send()
-            .await?
-            .error_for_status()?
-            .text()
-            .await?;
-        let obj: GoogleGenAIEmbedResponse = serde_json::from_str(&text)?;
-        Ok(obj.embeddings.iter()
-            .map(|v| v.values.to_owned())
-            .collect())
-    }
-}
-
-fn prepare_chat(chat: &Vec<messages::Message>) -> Vec<GoogleGenAIMessage> {
-    return chat.into_iter().map(|msg| GoogleGenAIMessage {
-        role: match msg.role {
-            messages::Role::User => "user".to_string(),
-            messages::Role::Model => "model".to_string(),
-        },
-        parts: vec![MessageParts { text: &msg.text }],
-    }).collect();
 }
 
 #[async_trait::async_trait]
@@ -80,8 +35,8 @@ impl frame::Interface for GoogleGenAIInterface {
         let client = reqwest::Client::new();
         let text = client
             .post(&self.get_endpoint())
-            .json(&GoogleGenAIRequest {
-                contents: prepare_chat(&state.chat),
+            .json(&generate::GoogleGenAIRequest {
+                contents: state.chat.iter().map(generate::GoogleGenAIMessage::from).collect(),
             })
             .send()
             .await?
