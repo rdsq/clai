@@ -1,4 +1,5 @@
 use crate::states::InterfaceState;
+use std::io::{self, Read};
 
 #[derive(clap::Parser, Debug)]
 /// Search which strings better match a pattern
@@ -92,12 +93,9 @@ async fn get_embeddings(state: &InterfaceState, items: &Vec<String>, input_forma
             names_vec.extend(items.clone());
         },
         InputFormats::JSON => {
-            let arg = &items.iter().nth(0)
-                .unwrap_or_else(|| {
-                    eprintln!("Provide an argument with a JSON array");
-                    std::process::exit(1);
-                });
-            let arr: Vec<InputObject> = serde_json::from_str(arg)
+            let mut input = String::new();
+            io::stdin().read_to_string(&mut input).unwrap();
+            let arr: Vec<InputObject> = serde_json::from_str(&input)
                 .unwrap_or_else(|err| {
                     eprintln!("Error while parsing JSON: {}", err);
                     std::process::exit(1);

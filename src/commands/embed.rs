@@ -1,4 +1,5 @@
 use crate::states::InterfaceState;
+use std::io::{self, Read};
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, clap::ValueEnum, Debug)]
 enum IOFormats {
@@ -43,11 +44,9 @@ pub async fn embed(args: Embed) {
     let items: Vec<String> = match args.input_format {
         IOFormats::Plain => args.items,
         IOFormats::JSON => {
-            if args.items.is_empty() {
-                eprintln!("Provide an argument with a JSON array");
-                std::process::exit(1);
-            }
-            serde_json::from_str(&args.items[0])
+            let mut input = String::new();
+            io::stdin().read_to_string(&mut input).unwrap();
+            serde_json::from_str(&input)
                 .unwrap_or_else(|err| {
                     eprintln!("Error while parsing JSON: {}", err);
                     std::process::exit(1);
