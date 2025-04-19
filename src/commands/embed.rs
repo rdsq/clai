@@ -12,6 +12,14 @@ pub struct Embed {
     pairs: bool,
 }
 
+fn create_label<'a>(original: &str) -> String {
+    if let Some((first, _)) = original.split_once('\n') {
+        format!("{}...", first)
+    } else {
+        original.to_string()
+    }
+}
+
 pub async fn embed(args: Embed) {
     let state = InterfaceState::new(&args.model);
     let embeddings = state.interface.embeddings(&args.items).await
@@ -22,7 +30,7 @@ pub async fn embed(args: Embed) {
     for (i, emb) in embeddings.into_iter().enumerate() {
         print!("{}", emb.iter().map(|v| v.to_string()).collect::<Vec<String>>().join(","));
         if args.pairs {
-            println!(" {}", args.items[i]);
+            println!(" {}", create_label(&args.items[i]));
         } else {
             println!();
         }
