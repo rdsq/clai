@@ -14,7 +14,7 @@ impl GoogleGenAIInterface {
     pub fn new(model: String) -> Result<Self, String> {
         let api_key = std::env::var("GOOGLE_GENAI_API_KEY");
         if let Err(err) = api_key {
-            return Err(err.to_string());
+            return Err(format!("GOOGLE_GENAI_API_KEY: {}", err));
         }
         Ok(Self {
             model,
