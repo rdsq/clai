@@ -1,6 +1,6 @@
 # Clai
 
-A custom **CLIent** *(get it? CLI and client how funny)* for different AI things. Primarily **chatting**, but also some embedding **functionality**
+A custom **CLIent** *(get it? CLI and client how funny)* for different AI things. Primarily **chatting**, but also some **embedding** functionality
 
 ## Interfaces
 
