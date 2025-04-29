@@ -89,3 +89,5 @@ cat my-posts.json | clai semsearch ollama:nomic-embed-text -f json 'cats'
 - Model parameters
 
 - Images and multimodality
+
+- Option to disable streaming (for better formatting)
