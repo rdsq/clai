@@ -6,7 +6,7 @@ A custom **CLIent** *(get it? CLI and client how funny)* for different AI things
 
 The format this thing uses for naming models is **interfaces**. It is `provider:model`. Available providers:
 
-- `ollama`
+- `ollama` *(optional `OLLAMA_HOST` variable (`http://localhost:11434` by default))*
 
 - `google` *(set the `GOOGLE_GENAI_API_KEY` env var)*
 

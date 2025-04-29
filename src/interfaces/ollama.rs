@@ -59,13 +59,18 @@ struct OllamaEmbeddingResponse {
     embeddings: Vec<Vec<f32>>,
 }
 
+fn get_host() -> String {
+    std::env::var("OLLAMA_HOST")
+        .unwrap_or("http://localhost:11434".to_string())
+}
+
 #[async_trait::async_trait]
 impl frame::Interface for OllamaInterface {
     async fn generate(&self, state: &ContextState, callback: Box<dyn Fn(String) -> () + Send>) -> Result<String, Box<dyn std::error::Error>> {
         let client = reqwest::Client::new();
         let options = &state.parameters;
         let res = client
-            .post("http://localhost:11434/api/chat")
+            .post(&format!("{}/api/chat", get_host()))
             .json(&OllamaRequest {
                 messages: prepare_chat(&state),
                 model: self.model.clone(),
@@ -97,7 +102,7 @@ impl frame::Interface for OllamaInterface {
     async fn embeddings(&self, input: &Vec<String>) -> Result<Vec<Vec<f32>>, Box<dyn std::error::Error>> {
         let client = reqwest::Client::new();
         let res = client
-            .post("http://localhost:11434/api/embed")
+            .post(&format!("{}/api/embed", get_host()))
             .json(&OllamaEmbeddingRequest {
                 model: &self.model,
                 input: &input.into_iter().map(|v| if v.is_empty() {
