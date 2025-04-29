@@ -45,8 +45,12 @@ impl frame::Interface for GoogleGenAIInterface {
             .post(&self.get_endpoint())
             .json(&request)
             .send()
-            .await?
-            .error_for_status()?;
+            .await?;
+        if !res.status().is_success() {
+            let status = res.status();
+            let text = res.text().await?;
+            return Err(format!("Error {}: {}", status, text).into());
+        }
         let mut stream = res.bytes_stream();
         let mut full = String::new();
         while let Some(chunk_bytes_unknown) = stream.next().await {

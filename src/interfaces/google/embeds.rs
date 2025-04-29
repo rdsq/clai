@@ -6,17 +6,20 @@ impl super::GoogleGenAIInterface {
     }
     pub async fn embeddings_at_most_100(&self, input: &Vec<String>) -> Result<Vec<Vec<f32>>, Box<dyn std::error::Error>> {
         let client = reqwest::Client::new();
-        let text = client
+        let res = client
             .post(&self.get_embed_endpoint())
             .json(&GoogleGenAIEmbedRequest {
                 model: self.model_bullshit(),
                 requests: input.iter().map(|v| GoogleGenAIEmbedItem::new(self.model_bullshit(), v)).collect(),
             })
             .send()
-            .await?
-            .error_for_status()?
-            .text()
             .await?;
+        if !res.status().is_success() {
+            let status = res.status();
+            let text = res.text().await?;
+            return Err(format!("Error {}: {}", status, text).into());
+        }
+        let text = res.text().await?;
         let obj: GoogleGenAIEmbedResponse = serde_json::from_str(&text)?;
         Ok(obj.embeddings.iter()
             .map(|v| v.values.to_owned())
