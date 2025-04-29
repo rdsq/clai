@@ -14,27 +14,27 @@ impl OllamaInterface {
 }
 
 #[derive(Serialize)]
-struct OllamaMessage {
-    role: String,
-    content: String,
+struct OllamaMessage<'a> {
+    role: &'a str,
+    content: &'a str,
 }
 
-fn prepare_chat(state: &ContextState) -> Vec<OllamaMessage> {
-    let mut messages: Vec<OllamaMessage> = Vec::new();
+fn prepare_chat<'a>(state: &'a ContextState) -> Vec<OllamaMessage<'a>> {
+    let mut messages: Vec<OllamaMessage<'a>> = Vec::new();
     let system_prompt = &state.system;
     if let Some(system) = system_prompt {
         messages.insert(0, OllamaMessage {
-            role: "system".to_string(),
-            content: system.to_string(),
+            role: "system",
+            content: &system,
         });
     }
     for msg in &state.chat {
         messages.push(OllamaMessage {
             role: match msg.role {
-                messages::Role::User => "user".to_string(),
-                messages::Role::Model => "assistant".to_string(),
+                messages::Role::User => "user",
+                messages::Role::Model => "assistant",
             },
-            content: msg.text.clone(),
+            content: &msg.text,
         });
     }
     messages
@@ -42,8 +42,8 @@ fn prepare_chat(state: &ContextState) -> Vec<OllamaMessage> {
 
 #[derive(Serialize)]
 struct OllamaRequest<'a> {
-    messages: Vec<OllamaMessage>,
-    model: String,
+    messages: Vec<OllamaMessage<'a>>,
+    model: &'a str,
     stream: bool,
     options: &'a std::collections::HashMap<String, serde_json::Value>,
 }
@@ -73,7 +73,7 @@ impl frame::Interface for OllamaInterface {
             .post(&format!("{}/api/chat", get_host()))
             .json(&OllamaRequest {
                 messages: prepare_chat(&state),
-                model: self.model.clone(),
+                model: &self.model,
                 stream: true,
                 options,
             })
