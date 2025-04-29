@@ -10,11 +10,13 @@ pub struct GoogleGenAIInterface {
     api_key: String,
 }
 
+const ENV_VAR: &str = "GEMINI_API_KEY";
+
 impl GoogleGenAIInterface {
     pub fn new(model: String) -> Result<Self, String> {
-        let api_key = std::env::var("GOOGLE_GENAI_API_KEY");
+        let api_key = std::env::var(ENV_VAR);
         if let Err(err) = api_key {
-            return Err(format!("GOOGLE_GENAI_API_KEY: {}", err));
+            return Err(format!("{}: {}", ENV_VAR, err));
         }
         Ok(Self {
             model,

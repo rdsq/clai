@@ -8,7 +8,7 @@ The format this thing uses for naming models is **interfaces**. It is `provider:
 
 - `ollama` *(optional `OLLAMA_HOST` variable (`http://localhost:11434` by default))*
 
-- `google` *(set the `GOOGLE_GENAI_API_KEY` env var)*
+- `google` *(set the `GEMINI_API_KEY` env var with the [API key](https://ai.google.dev/gemini-api/docs/api-key))*
 
 ## Installation
 
