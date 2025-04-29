@@ -28,6 +28,8 @@ This is exactly what you would expect. Open a chat with a chatbot
 clai chat ollama:gemma3:1b
 ```
 
+Chat mode also has **commands**! Type `/help` in chat to see more
+
 ### Read (and saves in general)
 
 It also has a feature where you can define an autosave file in `gen` and `chat` using the `--file` option
@@ -79,3 +81,11 @@ And then:
 ```sh
 cat my-posts.json | clai semsearch ollama:nomic-embed-text -f json 'cats'
 ```
+
+## Planned features
+
+- More interfaces *(not a priority for me personally since I don't use other APIs right now)*
+
+- Model parameters
+
+- Images and multimodality
