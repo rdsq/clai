@@ -10,6 +10,9 @@ pub enum UserActions {
     DeleteLast,
     Rewind(Option<usize>),
     SetSystemPrompt(Option<String>),
+    None,
+    SetParameter(String, serde_json::Value),
+    UnsetParameter(String),
 }
 
 pub fn prompt(rl: &mut rustyline::DefaultEditor) -> UserActions {
@@ -41,6 +44,19 @@ pub fn prompt(rl: &mut rustyline::DefaultEditor) -> UserActions {
             }
         },
         "/system" => UserActions::SetSystemPrompt(if content.is_empty() { None } else { Some(content.to_string()) }),
+        "/param" => {
+            if let Some((key, value)) = content.split_once(' ') {
+                match serde_json::from_str(value) {
+                    Ok(parsed) => UserActions::SetParameter(key.to_string(), parsed),
+                    Err(err) => {
+                        eprintln!("Error while parsing JSON: {}", err);
+                        UserActions::None
+                    }
+                }
+            } else {
+                UserActions::UnsetParameter(content.to_string())
+            }
+        },
         _ => UserActions::Prompt(inp),
     }
 }

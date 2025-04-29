@@ -41,10 +41,11 @@ fn prepare_chat(state: &ContextState) -> Vec<OllamaMessage> {
 }
 
 #[derive(Serialize)]
-struct OllamaRequest {
+struct OllamaRequest<'a> {
     messages: Vec<OllamaMessage>,
     model: String,
     stream: bool,
+    options: &'a std::collections::HashMap<String, serde_json::Value>,
 }
 
 #[derive(Serialize)]
@@ -62,12 +63,14 @@ struct OllamaEmbeddingResponse {
 impl frame::Interface for OllamaInterface {
     async fn generate(&self, state: &ContextState, callback: Box<dyn Fn(String) -> () + Send>) -> Result<String, Box<dyn std::error::Error>> {
         let client = reqwest::Client::new();
+        let options = &state.parameters;
         let res = client
             .post("http://localhost:11434/api/chat")
             .json(&OllamaRequest {
                 messages: prepare_chat(&state),
                 model: self.model.clone(),
                 stream: true,
+                options,
             })
             .send()
             .await?;

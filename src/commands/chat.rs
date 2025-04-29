@@ -12,6 +12,9 @@ pub struct Chat {
     /// System prompt
     #[arg(short, long, default_value = None)]
     system: Option<String>,
+    /// Parameters for the model as JSON
+    #[arg(short, long, default_value = None)]
+    parameters: Option<String>,
 }
 
 fn print_status(state: &AppState) {
@@ -21,12 +24,28 @@ fn print_status(state: &AppState) {
         Some(path) => &path,
         None => "[not set]",
     });
+    if let Some(system) = &state.context.system {
+        println!("System prompt: {}", system);
+    }
+    if !state.context.parameters.is_empty() {
+        println!("Parameters:");
+        for (key, value) in &state.context.parameters {
+            println!("  {}: {:?}", key, value);
+        }
+    }
 }
 
 pub async fn chat(args: Chat) {
     let mut rl = rustyline::DefaultEditor::new().unwrap();
     let mut state = AppState::new(args.file, &args.model);
     state.context.system = args.system;
+    if let Some(parameters) = args.parameters {
+        state.context.parameters = serde_json::from_str(&parameters)
+            .unwrap_or_else(|err| {
+                eprintln!("Error while parsing JSON: {}", err);
+                std::process::exit(1);
+            });
+    }
     loop {
         match prompt(&mut rl) {
             UserActions::Prompt(prompt) => state.generate_to_output(prompt).await,
@@ -50,6 +69,9 @@ pub async fn chat(args: Chat) {
             },
             UserActions::Rewind(num) => state.context.rewind(&num),
             UserActions::SetSystemPrompt(system) => state.context.system = system,
+            UserActions::None => {},
+            UserActions::SetParameter(key, value) => { state.context.parameters.insert(key, value); },
+            UserActions::UnsetParameter(key) => { state.context.parameters.remove(&key); },
         }
     }
 }

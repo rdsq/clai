@@ -3,6 +3,7 @@ use std::fs;
 use serde_json;
 use std::io::Write;
 use super::messages::Message;
+use std::collections::HashMap;
 
 #[derive(Serialize, Deserialize)]
 pub struct ContextState {
@@ -10,11 +11,16 @@ pub struct ContextState {
     pub chat: Vec<Message>,
     #[serde(default)]
     pub system: Option<String>,
+    pub parameters: HashMap<String, serde_json::Value>,
 }
 
 impl ContextState {
     pub fn new() -> Self {
-        Self { chat: Vec::new(), system: None }
+        Self {
+            chat: Vec::new(),
+            system: None,
+            parameters: HashMap::new(),
+        }
     }
     pub fn from_optional_file(file: &Option<String>) -> Self {
         if let Some(path) = file {

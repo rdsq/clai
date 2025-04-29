@@ -34,12 +34,14 @@ impl frame::Interface for GoogleGenAIInterface {
     async fn generate(&self, state: &ContextState, callback: Box<dyn Fn(String) -> () + Send>) -> Result<String, Box<dyn std::error::Error>> {
         let client = reqwest::Client::new();
         let system_prompt = &state.system;
+        let generation_config = &state.parameters;
         let request = generate::GoogleGenAIRequest {
             system_instruction: match system_prompt {
                 Some(system) => Some(generate::GoogleGenAIMessage::new(None, &system)),
                 None => None,
             },
             contents: state.chat.iter().map(generate::GoogleGenAIMessage::from).collect(),
+            generation_config,
         };
         let res = client
             .post(&self.get_endpoint())

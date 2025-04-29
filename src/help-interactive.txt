@@ -8,3 +8,4 @@ Commands:
     /nvm: delete the last model response and user prompt pair
     /rewind [NUMBER]: show the last n messages in the chat, or all of them
     /system [PROMPT]: set the system prompt. Call with no arguments to unset it
+    /param <key> [value]: set a parameter for the model in JSON format. No value to unset

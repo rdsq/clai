@@ -29,5 +29,7 @@ pub struct GoogleGenAIRequest<'a> {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub system_instruction: Option<GoogleGenAIMessage<'a>>,
     pub contents: Vec<GoogleGenAIMessage<'a>>,
+    #[serde(rename = "generationConfig")]
+    pub generation_config: &'a std::collections::HashMap<String, serde_json::Value>,
 }
 
