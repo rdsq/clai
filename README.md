@@ -22,7 +22,9 @@ cargo install --path .
 
 *(this might take a while)*
 
-## Commands
+## Chatting
+
+This is the main functionality of this project, *but not the only one*
 
 ### Generate
 
@@ -62,9 +64,13 @@ You can define them to be the same model, different ones, whatever sounds fun
 clai model-with-model "Hello World" ollama:gemma3:1b google:gemini-2.0-flash
 ```
 
-### Semantic Search
+## Embeddinga
 
-This one is not about chatbots, it's about **embeddings**
+These are not about chatbots, they're about **embeddings**
+
+*Basically a thing that evaluates the semantic meaning of strings*
+
+### Semantic Search
 
 So basically, you can do stuff like
 
