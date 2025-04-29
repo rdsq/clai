@@ -1,4 +1,4 @@
-# Clai
+# clai
 
 A custom **CLIent** *(get it? CLI and client how funny)* for different AI things. Primarily **chatting**, but also some **embedding** functionality
 
@@ -9,6 +9,18 @@ The format this thing uses for naming models is **interfaces**. It is `provider:
 - `ollama`
 
 - `google` *(set the `GOOGLE_GENAI_API_KEY` env var)*
+
+## Installation
+
+Since it is a **Rust** project, it is pretty straightforward
+
+Clone this repository wherever you like, and run
+
+```sh
+cargo install --path .
+```
+
+*(this might take a while)*
 
 ## Commands
 
