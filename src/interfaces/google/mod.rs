@@ -22,7 +22,7 @@ impl GoogleGenAIInterface {
         })
     }
     fn get_endpoint(&self) -> String {
-        format!("https://generativelanguage.googleapis.com/v1/models/{}:streamGenerateContent?alt=sse&key={}", self.model, self.api_key)
+        format!("https://generativelanguage.googleapis.com/v1beta/models/{}:streamGenerateContent?alt=sse&key={}", self.model, self.api_key)
     }
     fn get_embed_endpoint(&self) -> String {
         format!("https://generativelanguage.googleapis.com/v1beta/models/{}:batchEmbedContents?key={}", self.model, self.api_key)
@@ -33,11 +33,17 @@ impl GoogleGenAIInterface {
 impl frame::Interface for GoogleGenAIInterface {
     async fn generate(&self, state: &ContextState, callback: Box<dyn Fn(String) -> () + Send>) -> Result<String, Box<dyn std::error::Error>> {
         let client = reqwest::Client::new();
+        let system_prompt = &state.system;
+        let request = generate::GoogleGenAIRequest {
+            system_instruction: match system_prompt {
+                Some(system) => Some(generate::GoogleGenAIMessage::new(None, &system)),
+                None => None,
+            },
+            contents: state.chat.iter().map(generate::GoogleGenAIMessage::from).collect(),
+        };
         let res = client
             .post(&self.get_endpoint())
-            .json(&generate::GoogleGenAIRequest {
-                contents: state.chat.iter().map(generate::GoogleGenAIMessage::from).collect(),
-            })
+            .json(&request)
             .send()
             .await?
             .error_for_status()?;

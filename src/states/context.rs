@@ -7,11 +7,12 @@ use super::messages::Message;
 #[derive(Serialize, Deserialize)]
 pub struct ContextState {
     pub chat: Vec<Message>,
+    pub system: Option<String>,
 }
 
 impl ContextState {
     pub fn new() -> Self {
-        Self { chat: Vec::new() }
+        Self { chat: Vec::new(), system: None }
     }
     pub fn from_optional_file(file: &Option<String>) -> Self {
         if let Some(path) = file {

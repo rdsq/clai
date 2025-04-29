@@ -19,14 +19,25 @@ struct OllamaMessage {
     content: String,
 }
 
-fn prepare_chat(chat: &Vec<messages::Message>) -> Vec<OllamaMessage> {
-    return chat.into_iter().map(|msg| OllamaMessage {
-        role: match msg.role {
-            messages::Role::User => "user".to_string(),
-            messages::Role::Model => "assistant".to_string(),
-        },
-        content: msg.text.clone(),
-    }).collect();
+fn prepare_chat(state: &ContextState) -> Vec<OllamaMessage> {
+    let mut messages: Vec<OllamaMessage> = Vec::new();
+    let system_prompt = &state.system;
+    if let Some(system) = system_prompt {
+        messages.insert(0, OllamaMessage {
+            role: "system".to_string(),
+            content: system.to_string(),
+        });
+    }
+    for msg in &state.chat {
+        messages.push(OllamaMessage {
+            role: match msg.role {
+                messages::Role::User => "user".to_string(),
+                messages::Role::Model => "assistant".to_string(),
+            },
+            content: msg.text.clone(),
+        });
+    }
+    messages
 }
 
 #[derive(Serialize)]
@@ -54,7 +65,7 @@ impl frame::Interface for OllamaInterface {
         let res = client
             .post("http://localhost:11434/api/chat")
             .json(&OllamaRequest {
-                messages: prepare_chat(&state.chat),
+                messages: prepare_chat(&state),
                 model: self.model.clone(),
                 stream: true,
             })

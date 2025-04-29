@@ -9,6 +9,7 @@ pub enum UserActions {
     Status,
     DeleteLast,
     Rewind(Option<usize>),
+    SetSystemPrompt(Option<String>),
 }
 
 pub fn prompt(rl: &mut rustyline::DefaultEditor) -> UserActions {
@@ -39,6 +40,7 @@ pub fn prompt(rl: &mut rustyline::DefaultEditor) -> UserActions {
                 })))
             }
         },
+        "/system" => UserActions::SetSystemPrompt(if content.is_empty() { None } else { Some(content.to_string()) }),
         _ => UserActions::Prompt(inp),
     }
 }

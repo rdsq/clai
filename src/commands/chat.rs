@@ -9,6 +9,9 @@ pub struct Chat {
     /// Read and save the chat to a file
     #[arg(short, long, default_value = None)]
     file: Option<String>,
+    /// System prompt
+    #[arg(short, long, default_value = None)]
+    system: Option<String>,
 }
 
 fn print_status(state: &AppState) {
@@ -23,6 +26,7 @@ fn print_status(state: &AppState) {
 pub async fn chat(args: Chat) {
     let mut rl = rustyline::DefaultEditor::new().unwrap();
     let mut state = AppState::new(args.file, &args.model);
+    state.context.system = args.system;
     loop {
         match prompt(&mut rl) {
             UserActions::Prompt(prompt) => state.generate_to_output(prompt).await,
@@ -45,6 +49,7 @@ pub async fn chat(args: Chat) {
                 state.try_autosave();
             },
             UserActions::Rewind(num) => state.context.rewind(&num),
+            UserActions::SetSystemPrompt(system) => state.context.system = system,
         }
     }
 }
