@@ -6,7 +6,9 @@ use super::messages::Message;
 
 #[derive(Serialize, Deserialize)]
 pub struct ContextState {
+    #[serde(default)]
     pub chat: Vec<Message>,
+    #[serde(default)]
     pub system: Option<String>,
 }
 
