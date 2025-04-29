@@ -64,7 +64,7 @@ You can define them to be the same model, different ones, whatever sounds fun
 clai model-with-model "Hello World" ollama:gemma3:1b google:gemini-2.0-flash
 ```
 
-## Embeddinga
+## Embeddings
 
 These are not about chatbots, they're about **embeddings**
 
