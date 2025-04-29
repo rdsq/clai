@@ -1,9 +1,9 @@
 pub mod data_types;
 use crate::interfaces::frame;
 use crate::states::ContextState;
-use crate::markdown::markdown_to_ansi;
 use data_types::generate;
 mod embeds;
+use futures_util::StreamExt;
 
 pub struct GoogleGenAIInterface {
     pub model: String,
@@ -22,7 +22,7 @@ impl GoogleGenAIInterface {
         })
     }
     fn get_endpoint(&self) -> String {
-        format!("https://generativelanguage.googleapis.com/v1/models/{}:generateContent?key={}", self.model, self.api_key)
+        format!("https://generativelanguage.googleapis.com/v1/models/{}:streamGenerateContent?alt=sse&key={}", self.model, self.api_key)
     }
     fn get_embed_endpoint(&self) -> String {
         format!("https://generativelanguage.googleapis.com/v1beta/models/{}:batchEmbedContents?key={}", self.model, self.api_key)
@@ -33,20 +33,25 @@ impl GoogleGenAIInterface {
 impl frame::Interface for GoogleGenAIInterface {
     async fn generate(&self, state: &ContextState, callback: Box<dyn Fn(String) -> () + Send>) -> Result<String, Box<dyn std::error::Error>> {
         let client = reqwest::Client::new();
-        let text = client
+        let res = client
             .post(&self.get_endpoint())
             .json(&generate::GoogleGenAIRequest {
                 contents: state.chat.iter().map(generate::GoogleGenAIMessage::from).collect(),
             })
             .send()
             .await?
-            .error_for_status()?
-            .text()
-            .await?;
-        let obj: data_types::gen_response::GoogleGenAIResponse = serde_json::from_str(&text)?;
-        let message = obj.get_text();
-        callback(markdown_to_ansi(&message));
-        Ok(message)
+            .error_for_status()?;
+        let mut stream = res.bytes_stream();
+        let mut full = String::new();
+        while let Some(chunk_bytes_unknown) = stream.next().await {
+            let chunk_bytes_weird = chunk_bytes_unknown?;
+            let chunk_bytes = chunk_bytes_weird.strip_prefix(b"data: ").unwrap_or(&chunk_bytes_weird);
+            let obj: data_types::gen_response::GoogleGenAIResponse = serde_json::from_slice(&chunk_bytes)?;
+            let text = obj.get_text();
+            full.push_str(&text);
+            callback(text);
+        }
+        Ok(full)
     }
     fn model_id(&self) -> String {
         format!("google:{}", self.model)
