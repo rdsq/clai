@@ -29,6 +29,9 @@ fn prepare_chat<'a>(state: &'a ContextState) -> Vec<OllamaMessage<'a>> {
         });
     }
     for msg in &state.chat {
+        if !msg.media.is_empty() {
+            eprintln!("warning: multimodality for Ollama is currently not implemented");
+        }
         messages.push(OllamaMessage {
             role: match msg.role {
                 messages::Role::User => "user",

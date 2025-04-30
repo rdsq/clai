@@ -18,9 +18,20 @@ impl Role {
 }
 
 #[derive(Serialize, Deserialize)]
+#[serde(tag = "type")]
+pub enum Media {
+    Image {
+        mime: String,
+        data: Vec<u8>,
+    },
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct Message {
     pub role: Role,
     pub text: String,
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
+    pub media: Vec<Media>,
 }
 
 impl Message {

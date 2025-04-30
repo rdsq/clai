@@ -1,4 +1,5 @@
 use crate::states::AppState;
+use crate::states::messages::Media;
 
 #[derive(clap::Parser, Debug)]
 /// Generate a response
@@ -16,6 +17,9 @@ pub struct Generate {
     /// Parameters for the model as JSON
     #[arg(short, long, default_value = None)]
     parameters: Option<String>,
+    /// Add an image for multimodal models
+    #[arg(short, long, default_value = None)]
+    image: Option<String>,
 }
 
 pub async fn generate(args: Generate) {
@@ -28,5 +32,22 @@ pub async fn generate(args: Generate) {
                 std::process::exit(1);
             });
     }
-    state.generate_to_output(args.prompt).await;
+    let mut media = Vec::new();
+    if let Some(image_path) = args.image {
+        let path = std::path::Path::new(&image_path);
+        let extension = path.extension().unwrap_or_else(|| {
+            eprintln!("Could not find the mime of {}", image_path);
+            std::process::exit(1);
+        }).to_str().unwrap();
+        let data: Vec<u8> = std::fs::read(&image_path)
+            .unwrap_or_else(|err| {
+                eprintln!("Failed to read image file: {}", err);
+                std::process::exit(1);
+            });
+        media.push(Media::Image {
+            data,
+            mime: format!("image/{}", extension),
+        });
+    }
+    state.generate_to_output(args.prompt, media).await;
 }

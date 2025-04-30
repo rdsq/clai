@@ -39,7 +39,7 @@ impl frame::Interface for GoogleGenAIInterface {
         let generation_config = &state.parameters;
         let request = generate::GoogleGenAIRequest {
             system_instruction: match system_prompt {
-                Some(system) => Some(generate::GoogleGenAIMessage::new(None, &system)),
+                Some(system) => Some(generate::GoogleGenAIMessage::new(None, &system, vec![])),
                 None => None,
             },
             contents: state.chat.iter().map(generate::GoogleGenAIMessage::from).collect(),

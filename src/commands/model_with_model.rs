@@ -19,6 +19,7 @@ pub async fn model_with_model(args: ModelWithModel) {
     let msg = messages::Message {
         role: messages::Role::Model,
         text: args.prompt,
+        media: vec![],
     };
     let names_are_same = state1.interface.interface.model_id() == state2.interface.interface.model_id();
     fn model_name(name: String, state: &AppState, names_are_same: &bool) {
@@ -38,6 +39,6 @@ pub async fn model_with_model(args: ModelWithModel) {
         model_name(name, &main_state, &names_are_same);
         io::stdout().flush().unwrap();
         let prompt = secondary_state.context.chat.last().unwrap().text.clone();
-        main_state.generate_to_output(prompt).await;
+        main_state.generate_to_output(prompt, vec![]).await;
     }
 }

@@ -34,6 +34,8 @@ Simlest one of them, simply **generate** a response from a prompt. So it's somet
 clai gen ollama:gemma3:1b "Hello World"
 ```
 
+You can also attach an image with `--image patg/to/image.jpg` if the model supports it
+
 ### Chat
 
 This is exactly what you would expect. Open a chat with a chatbot
@@ -103,7 +105,5 @@ cat my-posts.json | clai semsearch ollama:nomic-embed-text -f json 'cats'
 ## Planned features
 
 - More interfaces *(not a priority for me personally since I don't use other APIs right now)*
-
-- Images and multimodality
 
 - Option to disable streaming (for better formatting)

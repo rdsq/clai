@@ -48,7 +48,7 @@ pub async fn chat(args: Chat) {
     }
     loop {
         match prompt(&mut rl) {
-            UserActions::Prompt(prompt) => state.generate_to_output(prompt).await,
+            UserActions::Prompt(prompt) => state.generate_to_output(prompt, vec![]).await,
             UserActions::Exit => break,
             UserActions::SetModel(model) => state.set_interface(&model),
             UserActions::Save(path) => state.context.write_to_file(&path),
@@ -59,7 +59,8 @@ pub async fn chat(args: Chat) {
                 .unwrap_or_else(|e| {
                     eprintln!("{}", e);
                     std::process::exit(1);
-                })
+                }),
+                vec![],
             ).await,
             UserActions::Status => print_status(&state),
             UserActions::DeleteLast => {

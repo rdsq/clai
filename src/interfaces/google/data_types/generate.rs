@@ -1,6 +1,7 @@
 use serde::Serialize;
-use super::message_parts::MessageParts;
+use super::message_parts::{MessageParts, ImageInlineData};
 use crate::states::messages;
+use base64::prelude::*;
 
 #[derive(Serialize)]
 pub struct GoogleGenAIMessage<'a> {
@@ -10,8 +11,12 @@ pub struct GoogleGenAIMessage<'a> {
 }
 
 impl<'a> GoogleGenAIMessage<'a> {
-    pub fn new(role: Option<&'a str>, text: &'a str) -> Self {
-        Self { role, parts: vec![MessageParts { text }] }
+    pub fn new(role: Option<&'a str>, text: &'a str, images: Vec<(&Vec<u8>, &'a str)>) -> Self {
+        let mut parts = vec![MessageParts::Text { text }];
+        parts.extend(images.iter().map(|img| MessageParts::Image{
+            inline_data: ImageInlineData { data: BASE64_STANDARD.encode(img.0), mime_type: img.1 },
+        }));
+        Self { role, parts }
     }
     pub fn from(message: &'a messages::Message) -> Self {
         Self::new(
@@ -20,6 +25,9 @@ impl<'a> GoogleGenAIMessage<'a> {
                 messages::Role::Model => "model",
             }),
             &message.text,
+            message.media.iter().map(|media| match media {
+                messages::Media::Image { data, mime } => (data, mime as &str),
+            }).collect(),
         )
     }
 }
@@ -32,4 +40,3 @@ pub struct GoogleGenAIRequest<'a> {
     #[serde(rename = "generationConfig")]
     pub generation_config: &'a std::collections::HashMap<String, serde_json::Value>,
 }
-
