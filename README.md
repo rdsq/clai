@@ -20,8 +20,6 @@ Clone this repository wherever you like, and run
 cargo install --path .
 ```
 
-*(this might take a while)*
-
 ## Chatting
 
 This is the main functionality of this project, *but not the only one*
