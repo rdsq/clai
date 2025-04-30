@@ -9,11 +9,11 @@ pub enum Role {
 }
 
 impl Role {
-    pub fn to_user_string(&self) -> String {
+    pub fn to_user_string(&self) -> &'static str {
         return match self {
             Self::User => "User",
             Self::Model => "Model",
-        }.to_string();
+        };
     }
 }
 
