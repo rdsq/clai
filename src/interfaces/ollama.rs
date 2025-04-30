@@ -2,6 +2,7 @@ use serde::{Serialize, Deserialize};
 use crate::interfaces::frame;
 use futures_util::StreamExt;
 use crate::states::{messages, ContextState};
+use base64::prelude::*;
 
 pub struct OllamaInterface {
     pub model: String,
@@ -17,6 +18,8 @@ impl OllamaInterface {
 struct OllamaMessage<'a> {
     role: &'a str,
     content: &'a str,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    images: Vec<String>,
 }
 
 fn prepare_chat<'a>(state: &'a ContextState) -> Vec<OllamaMessage<'a>> {
@@ -26,18 +29,19 @@ fn prepare_chat<'a>(state: &'a ContextState) -> Vec<OllamaMessage<'a>> {
         messages.insert(0, OllamaMessage {
             role: "system",
             content: &system,
+            images: vec![],
         });
     }
     for msg in &state.chat {
-        if !msg.media.is_empty() {
-            eprintln!("warning: multimodality for Ollama is currently not implemented");
-        }
         messages.push(OllamaMessage {
             role: match msg.role {
                 messages::Role::User => "user",
                 messages::Role::Model => "assistant",
             },
             content: &msg.text,
+            images: msg.media.iter().map(|media| match media {
+                messages::Media::Image { data, mime: _ } => BASE64_STANDARD.encode(&data),
+            }).collect(),
         });
     }
     messages
