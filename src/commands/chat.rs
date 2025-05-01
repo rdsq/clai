@@ -16,6 +16,9 @@ pub struct Chat {
     /// Parameters for the model as JSON
     #[arg(short, long, default_value = None)]
     parameters: Option<String>,
+    /// Initial prompt to start the chat from
+    #[arg(long, default_value = None)]
+    prompt: Option<String>,
 }
 
 fn print_status(state: &AppState) {
@@ -47,6 +50,13 @@ pub async fn chat(args: Chat) {
                 std::process::exit(1);
             });
     }
+    if let Some(initial_prompt) = args.prompt {
+        state.context.chat.push(messages::Message {
+            text: initial_prompt,
+            role: messages::Role::User,
+            media: vec![],
+        });
+    }
     loop {
         if state.context.chat.len() % 2 == 1 {
             let res = state.generate_to_output().await;
@@ -54,8 +64,9 @@ pub async fn chat(args: Chat) {
                 eprintln!("{}", err);
                 match recovery_prompt(&mut rl) {
                     RecoveryAction::Retry => continue,
-                    RecoveryAction::Discard => state.context.chat.pop(),
+                    RecoveryAction::Discard => { state.context.chat.pop(); },
                     RecoveryAction::Exit => break,
+                    RecoveryAction::ChangeModel(model) => state.set_interface(&model),
                 };
             }
         } else {
