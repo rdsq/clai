@@ -38,8 +38,12 @@ pub async fn model_with_model(args: ModelWithModel) {
         is_first = !is_first;
         model_name(name, &main_state, &names_are_same);
         io::stdout().flush().unwrap();
-        let prompt = secondary_state.context.chat.last().unwrap().text.clone();
-        main_state.generate_to_output(prompt, vec![]).await
+        main_state.context.chat.push(messages::Message {
+            text: secondary_state.context.chat.last().unwrap().text.clone(),
+            role: messages::Role::User,
+            media: vec![],
+        });
+        main_state.generate_to_output().await
             .unwrap_or_else(|err| {
                 eprintln!("{}", err);
                 std::process::exit(1);

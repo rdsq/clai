@@ -2,6 +2,7 @@ mod states;
 mod interfaces;
 mod commands;
 mod prompt;
+mod recovery_prompt;
 mod markdown;
 
 use clap::{Parser, Subcommand};

@@ -1,5 +1,5 @@
 use crate::states::AppState;
-use crate::states::messages::Media;
+use crate::states::messages;
 
 #[derive(clap::Parser, Debug)]
 /// Generate a response
@@ -44,12 +44,17 @@ pub async fn generate(args: Generate) {
                 eprintln!("Failed to read image file: {}", err);
                 std::process::exit(1);
             });
-        media.push(Media::Image {
+        media.push(messages::Media::Image {
             data,
             mime: format!("image/{}", extension),
         });
     }
-    state.generate_to_output(args.prompt, media).await
+    state.context.chat.push(messages::Message {
+        text: args.prompt,
+        role: messages::Role::User,
+        media,
+    });
+    state.generate_to_output().await
         .unwrap_or_else(|err| {
             eprintln!("{}", err);
             std::process::exit(1);
