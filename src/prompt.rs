@@ -5,7 +5,6 @@ pub enum UserActions {
     Save(String),
     SetFile(String),
     Help,
-    PromptFromFile(String),
     Status,
     DeleteLast,
     Rewind(Option<usize>),
@@ -30,7 +29,13 @@ pub fn prompt(rl: &mut rustyline::DefaultEditor) -> UserActions {
         "/save" => UserActions::Save(content),
         "/setfile" => UserActions::SetFile(content),
         "/exit" => UserActions::Exit,
-        "/fromfile" => UserActions::PromptFromFile(content),
+        "/fromfile" => match std::fs::read_to_string(content) {
+            Ok(prompt) => UserActions::Prompt(prompt),
+            Err(err) => {
+                eprintln!("Error while reading from file: {}", err);
+                UserActions::None
+            }
+        },
         "/status" => UserActions::Status,
         "/nvm" => UserActions::DeleteLast,
         "/rewind" => {
