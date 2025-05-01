@@ -39,6 +39,10 @@ pub async fn model_with_model(args: ModelWithModel) {
         model_name(name, &main_state, &names_are_same);
         io::stdout().flush().unwrap();
         let prompt = secondary_state.context.chat.last().unwrap().text.clone();
-        main_state.generate_to_output(prompt, vec![]).await;
+        main_state.generate_to_output(prompt, vec![]).await
+            .unwrap_or_else(|err| {
+                eprintln!("{}", err);
+                std::process::exit(1);
+            });
     }
 }

@@ -49,5 +49,9 @@ pub async fn generate(args: Generate) {
             mime: format!("image/{}", extension),
         });
     }
-    state.generate_to_output(args.prompt, media).await;
+    state.generate_to_output(args.prompt, media).await
+        .unwrap_or_else(|err| {
+            eprintln!("{}", err);
+            std::process::exit(1);
+        });
 }
