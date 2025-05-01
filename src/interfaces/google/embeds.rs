@@ -1,4 +1,8 @@
-use super::data_types::embed::{GoogleGenAIEmbedRequest, GoogleGenAIEmbedResponse, GoogleGenAIEmbedItem};
+use super::data_types::embed::{
+    GoogleGenAIEmbedRequest,
+    GoogleGenAIEmbedResponse,
+    GoogleGenAIEmbedItem,
+};
 
 impl super::GoogleGenAIInterface {
     fn model_bullshit(&self) -> String {

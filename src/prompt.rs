@@ -37,10 +37,13 @@ pub fn prompt(rl: &mut rustyline::DefaultEditor) -> UserActions {
             if content == cmd { // according to the split logic
                 UserActions::Rewind(None)
             } else {
-                UserActions::Rewind(Some(content.parse().unwrap_or_else(|err| {
-                    eprintln!("Error while parsing the number: {}", err);
-                    std::process::exit(1);
-                })))
+                match content.parse::<usize>() {
+                    Ok(num) => UserActions::Rewind(Some(num)),
+                    Err(err) => {
+                        eprintln!("Error while parsing the number: {}", err);
+                        UserActions::None
+                    },
+                }
             }
         },
         "/system" => UserActions::SetSystemPrompt(if content.is_empty() { None } else { Some(content.to_string()) }),
