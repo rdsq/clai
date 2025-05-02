@@ -58,7 +58,7 @@ pub async fn chat(args: Chat) {
         });
     }
     loop {
-        if state.context.chat.len() % 2 == 1 {
+        if state.context.chat.last().and_then(|msg| Some(&msg.role)) == Some(&messages::Role::User) {
             let res = state.generate_to_output().await;
             if let Err(err) = res {
                 eprintln!("{}", err);

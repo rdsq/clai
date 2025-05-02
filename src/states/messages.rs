@@ -1,7 +1,7 @@
 use serde::{Serialize, Deserialize};
 use crate::markdown::markdown_to_ansi;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum Role {
     User,
