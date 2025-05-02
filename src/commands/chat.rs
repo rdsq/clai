@@ -64,7 +64,10 @@ pub async fn chat(args: Chat) {
                 eprintln!("{}", err);
                 match recovery_prompt(&mut rl) {
                     RecoveryAction::Retry => continue,
-                    RecoveryAction::Discard => { state.context.chat.pop(); },
+                    RecoveryAction::Discard => {
+                        state.context.chat.pop();
+                        state.try_autosave();
+                    },
                     RecoveryAction::Exit => break,
                     RecoveryAction::ChangeModel(model) => state.set_interface(&model),
                 };
@@ -88,10 +91,19 @@ pub async fn chat(args: Chat) {
                     state.try_autosave();
                 },
                 UserActions::Rewind(num) => state.context.rewind(&num),
-                UserActions::SetSystemPrompt(system) => state.context.system = system,
+                UserActions::SetSystemPrompt(system) => {
+                    state.context.system = system;
+                    state.try_autosave();
+                },
                 UserActions::None => {},
-                UserActions::SetParameter(key, value) => { state.context.parameters.insert(key, value); },
-                UserActions::UnsetParameter(key) => { state.context.parameters.remove(&key); },
+                UserActions::SetParameter(key, value) => {
+                    state.context.parameters.insert(key, value);
+                    state.try_autosave();
+                },
+                UserActions::UnsetParameter(key) => {
+                    state.context.parameters.remove(&key);
+                    state.try_autosave();
+                },
             }
         }
     }
