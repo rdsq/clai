@@ -110,7 +110,11 @@ async fn get_embeddings(state: &InterfaceState, items: &Vec<String>, input_forma
 }
 
 pub async fn semantic_search(args: SemanticSearch) {
-    let state = InterfaceState::new(&args.model);
+    let state = InterfaceState::new(&args.model)
+        .unwrap_or_else(|err| {
+            eprintln!("{}", err);
+            std::process::exit(1);
+        });
     let (names, embeds) = get_embeddings(&state, &args.items, args.input_format).await;
     let prompt_score = &state.interface.embeddings(&vec![args.prompt]).await
         .unwrap_or_else(|err| {

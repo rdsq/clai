@@ -11,7 +11,11 @@ impl AppState {
     pub fn new(file: Option<String>, interface: &str) -> Self {
         AppState {
             context: ContextState::from_optional_file(&file),
-            interface: InterfaceState::new(interface),
+            interface: InterfaceState::new(interface)
+                .unwrap_or_else(|err| {
+                    eprintln!("{}", err);
+                    std::process::exit(1);
+                }),
             autosave: file,
         }
     }
@@ -20,8 +24,9 @@ impl AppState {
             self.context.write_to_file(&file);
         }
     }
-    pub fn set_interface(&mut self, interface: &str) {
-        self.interface = InterfaceState::new(interface);
+    pub fn set_interface(&mut self, interface: &str) -> Result<(), String> {
+        self.interface = InterfaceState::new(interface)?;
+        Ok(())
     }
     pub async fn generate(&mut self, callback: Box<dyn Fn(String) -> () + Send>) -> Result<(), Box<dyn std::error::Error>> {
         let res = self.interface.interface.generate(&self.context, callback).await;

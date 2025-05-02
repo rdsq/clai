@@ -6,19 +6,15 @@ pub struct InterfaceState {
 }
 
 impl InterfaceState {
-    pub fn new(input: &str) -> Self {
-        let (interface_name, model) = input.split_once(':')
-            .unwrap_or_else(|| {
-                println!("Invalid interface:model format");
-                std::process::exit(1);
-            });
-        let interface = get_interface(interface_name, model.to_string())
-            .unwrap_or_else(|err| {
-                eprintln!("{}", err.to_string());
-                std::process::exit(1);
-            });
-        Self {
-            interface,
+    pub fn new(input: &str) -> Result<Self, String> {
+        match input.split_once(':') {
+            Some((interface_name, model)) => {
+                match get_interface(interface_name, model.to_string()) {
+                    Ok(interface) => Ok(Self { interface }),
+                    Err(err) => Err(err),
+                }
+            },
+            None => Err("Invalid interface:model format".to_string()),
         }
     }
 }

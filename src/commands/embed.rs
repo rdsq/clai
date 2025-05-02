@@ -40,7 +40,11 @@ fn create_label<'a>(original: &str) -> String {
 }
 
 pub async fn embed(args: Embed) {
-    let state = InterfaceState::new(&args.model);
+    let state = InterfaceState::new(&args.model)
+        .unwrap_or_else(|err| {
+            eprintln!("{}", err);
+            std::process::exit(1);
+        });
     let items: Vec<String> = match args.input_format {
         IOFormats::Plain => args.items,
         IOFormats::JSON => {

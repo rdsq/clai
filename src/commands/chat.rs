@@ -69,7 +69,10 @@ pub async fn chat(args: Chat) {
                         state.try_autosave();
                     },
                     RecoveryAction::Exit => break,
-                    RecoveryAction::ChangeModel(model) => state.set_interface(&model),
+                    RecoveryAction::ChangeModel(model) => state.set_interface(&model)
+                        .unwrap_or_else(|err| {
+                            eprintln!("{}", err);
+                        }),
                 };
             }
         } else {
@@ -80,7 +83,10 @@ pub async fn chat(args: Chat) {
                     media: vec![],
                 }),
                 UserActions::Exit => break,
-                UserActions::SetModel(model) => state.set_interface(&model),
+                UserActions::SetModel(model) => state.set_interface(&model)
+                    .unwrap_or_else(|err| {
+                        eprintln!("{}", err);
+                    }),
                 UserActions::Save(path) => state.context.write_to_file(&path),
                 UserActions::SetFile(path) => state.autosave = if path.is_empty() { None } else { Some(path) },
                 UserActions::Help => print!(include_str!("../help-interactive.txt")),
