@@ -5,7 +5,6 @@ edition = "2024"
 
 [dependencies]
 async-trait = "0.1.88"
-atty = "0.2.14"
 base64 = "0.22.1"
 clap = { version = "4.5.32", features = ["derive"] }
 futures-util = "0.3.31"

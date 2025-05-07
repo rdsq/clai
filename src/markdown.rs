@@ -1,9 +1,9 @@
-use atty::Stream;
+use std::io::{self, IsTerminal};
 use regex::Regex;
 
 pub fn markdown_to_ansi(md: &str) -> String {
     // If stdout is not a TTY, return plain text.
-    if !atty::is(Stream::Stdout) {
+    if !io::stdout().is_terminal() {
         return md.to_string();
     }
 
