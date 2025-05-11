@@ -9,8 +9,7 @@ use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
 #[command(name = "clai")]
-#[command(version = "1.0")]
-#[command(about = "Custom AI CLI client", long_about = None)]
+#[command(about = "AI CLIent")]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
