@@ -22,19 +22,19 @@ pub async fn model_with_model(args: ModelWithModel) {
         media: vec![],
     };
     let names_are_same = state1.interface.interface.model_id() == state2.interface.interface.model_id();
-    fn model_name(name: String, state: &AppState, names_are_same: &bool) {
-        messages::print_actor(&if *names_are_same {
-            name
+    fn model_name(name: &str, state: &AppState, names_are_same: &bool) {
+        if *names_are_same {
+            messages::print_actor(name);
         } else {
-            format!("{} ({})", name, state.interface.interface.model_id())
-        });
+            messages::print_actor(&format!("{} ({})", name, state.interface.interface.model_id()));
+        }
     }
-    model_name("Model 1".to_string(), &state1, &names_are_same);
+    model_name("Model 1", &state1, &names_are_same);
     msg.print();
     let mut is_first = false;
     state1.context.chat.push(msg);
     loop {
-        let (main_state, secondary_state, name) = if is_first { (&mut state1, &state2, "Model 1".to_string()) } else { (&mut state2, &state1, "Model 2".to_string()) };
+        let (main_state, secondary_state, name) = if is_first { (&mut state1, &state2, "Model 1") } else { (&mut state2, &state1, "Model 2") };
         is_first = !is_first;
         model_name(name, &main_state, &names_are_same);
         io::stdout().flush().unwrap();
