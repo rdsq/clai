@@ -8,12 +8,12 @@ pub struct GoogleGenAIEmbedPrediction {
 
 #[derive(Serialize)]
 pub struct GoogleGenAIEmbedItem<'a> {
-    pub model: String,
+    pub model: &'a str,
     pub content: MessagePartsBullshit<'a>,
 }
 
 impl<'a> GoogleGenAIEmbedItem<'a> {
-    pub fn new(model: String, text: &'a str) -> Self {
+    pub fn new(model: &'a str, text: &'a str) -> Self {
         Self {
             model,
             content: MessagePartsBullshit::new(text),
@@ -23,7 +23,7 @@ impl<'a> GoogleGenAIEmbedItem<'a> {
 
 #[derive(Serialize)]
 pub struct GoogleGenAIEmbedRequest<'a> {
-    pub model: String,
+    pub model: &'a str,
     pub requests: Vec<GoogleGenAIEmbedItem<'a>>,
 }
 

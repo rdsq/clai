@@ -5,16 +5,14 @@ use super::data_types::embed::{
 };
 
 impl super::GoogleGenAIInterface {
-    fn model_bullshit(&self) -> String {
-        format!("models/{}", self.model)
-    }
     pub async fn embeddings_at_most_100(&self, input: &Vec<String>) -> Result<Vec<Vec<f32>>, Box<dyn std::error::Error>> {
+        let model_bullshit = format!("models/{}", self.model);
         let client = reqwest::Client::new();
         let res = client
             .post(&self.get_embed_endpoint())
             .json(&GoogleGenAIEmbedRequest {
-                model: self.model_bullshit(),
-                requests: input.iter().map(|v| GoogleGenAIEmbedItem::new(self.model_bullshit(), v)).collect(),
+                model: &model_bullshit,
+                requests: input.iter().map(|v| GoogleGenAIEmbedItem::new(&model_bullshit, v)).collect(),
             })
             .send()
             .await?;
