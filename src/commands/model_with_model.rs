@@ -23,7 +23,7 @@ pub async fn model_with_model(args: ModelWithModel) {
     };
     let names_are_same = state1.interface.interface.model_id() == state2.interface.interface.model_id();
     fn model_name(name: String, state: &AppState, names_are_same: &bool) {
-        print!("\x1b[36;1m{}:\x1b[0m ", if *names_are_same {
+        messages::print_actor(&if *names_are_same {
             name
         } else {
             format!("{} ({})", name, state.interface.interface.model_id())

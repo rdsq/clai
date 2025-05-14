@@ -1,5 +1,6 @@
 use serde::{Serialize, Deserialize};
 use crate::markdown::markdown_to_ansi;
+use std::io::{self, IsTerminal};
 
 #[derive(Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]
@@ -9,7 +10,7 @@ pub enum Role {
 }
 
 impl Role {
-    pub fn to_user_string(&self) -> &'static str {
+    pub fn to_string(&self) -> &'static str {
         return match self {
             Self::User => "User",
             Self::Model => "Model",
@@ -34,6 +35,14 @@ pub struct Message {
     pub media: Vec<Media>,
 }
 
+pub fn print_actor(actor: &str) {
+    if std::env::var("NO_COLOR").is_err() && io::stdout().is_terminal() {
+        print!("\x1b[36;1m{}:\x1b[0m ", actor);
+    } else {
+        print!("{}: ", actor);
+    }
+}
+
 impl Message {
     pub fn ends_with_nl(&self) -> bool {
         self.text.ends_with("\n")
@@ -48,7 +57,7 @@ impl Message {
         self.compensate_nl();
     }
     pub fn print_with_role(&self) {
-        print!("\x1b[36;1m{}:\x1b[0m ", self.role.to_user_string());
+        print_actor(self.role.to_string());
         self.print();
     }
 }
