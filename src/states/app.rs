@@ -10,7 +10,11 @@ pub struct AppState {
 impl AppState {
     pub fn new(file: Option<String>, interface: &str) -> Self {
         AppState {
-            context: ContextState::from_optional_file(&file),
+            context: ContextState::from_optional_file(&file)
+                .unwrap_or_else(|err| {
+                    eprintln!("{}", err);
+                    std::process::exit(1);
+                }),
             interface: InterfaceState::new(interface)
                 .unwrap_or_else(|err| {
                     eprintln!("{}", err);
@@ -21,7 +25,11 @@ impl AppState {
     }
     pub fn try_autosave(&self) {
         if let Some(file) = &self.autosave {
-            self.context.write_to_file(&file);
+            self.context.write_to_file(&file)
+                .unwrap_or_else(|err| {
+                    eprintln!("{}", err);
+                    std::process::exit(1);
+                });
         }
     }
     pub fn set_interface(&mut self, interface: &str) -> Result<(), String> {

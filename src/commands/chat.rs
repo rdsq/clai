@@ -87,7 +87,11 @@ pub async fn chat(args: Chat) {
                     .unwrap_or_else(|err| {
                         eprintln!("{}", err);
                     }),
-                UserActions::Save(path) => state.context.write_to_file(&path),
+                UserActions::Save(path) => state.context.write_to_file(&path)
+                    .unwrap_or_else(|err| {
+                        eprintln!("{}", err);
+                        std::process::exit(1);
+                    }),
                 UserActions::SetFile(path) => state.autosave = if path.is_empty() { None } else { Some(path) },
                 UserActions::Help => print!(include_str!("../help-interactive.txt")),
                 UserActions::Status => print_status(&state),

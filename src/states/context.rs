@@ -22,47 +22,34 @@ impl ContextState {
             parameters: HashMap::new(),
         }
     }
-    pub fn from_optional_file(file: &Option<String>) -> Self {
+    pub fn from_optional_file(file: &Option<String>) -> Result<Self, Box<dyn std::error::Error>> {
         if let Some(path) = file {
             Self::from_file(&path, true)
         } else {
-            Self::new()
+            Ok(Self::new())
         }
     }
-    pub fn from_file(path: &str, allow_not_existing: bool) -> Self {
+    pub fn from_file(path: &str, allow_not_existing: bool) -> Result<Self, Box<dyn std::error::Error>> {
         let contents = fs::read_to_string(path);
         if let Err(err) = contents {
             if allow_not_existing && err.kind() == std::io::ErrorKind::NotFound {
-                return Self::new();
+                return Ok(Self::new());
             } else {
-                eprintln!("{}", err);
-                std::process::exit(1);
+                return Err(Box::new(err));
             }
         }
         let contents = contents.unwrap();
-        return serde_json::from_str(&contents)
-            .unwrap_or_else(|e| {
-                eprintln!("JSON parsing error: {}", e);
-                std::process::exit(1);
-            });
+        return Ok(serde_json::from_str(&contents)
+            .map_err(|e| -> Box<dyn std::error::Error> { format!("JSON parsing error: {}", e).into() })?);
     }
-    pub fn write_to_file(&self, path: &str) {
+    pub fn write_to_file(&self, path: &str) -> Result<(), Box<dyn std::error::Error>> {
         let contents = serde_json::to_string_pretty(&self)
-            .unwrap_or_else(|e| {
-                eprintln!("JSON stringifying error: {}", e);
-                std::process::exit(1);
-            });
+            .map_err(|e| -> Box<dyn std::error::Error> { format!("JSON stringifying error: {}", e).into() })?;
         let mut file = fs::File::create(path)
-            .unwrap_or_else(|e| {
-                eprintln!("Error while creating a file: {}", e);
-                // will it cause issues with overwriting? We'll find out
-                std::process::exit(1);
-            });
+            .map_err(|e| -> Box<dyn std::error::Error> { format!("Error while creating a file: {}", e).into() })?;
         file.write_all(contents.as_bytes())
-            .unwrap_or_else(|e| {
-                eprintln!("Error while writing the file: {}", e);
-                std::process::exit(1);
-            });
+            .map_err(|e| -> Box<dyn std::error::Error> { format!("Error while writing the file: {}", e).into() })?;
+        Ok(())
     }
     pub fn rewind(&self, num: &Option<usize>) {
         let mut start_index = 0;
