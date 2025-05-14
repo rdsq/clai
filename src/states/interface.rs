@@ -7,14 +7,9 @@ pub struct InterfaceState {
 
 impl InterfaceState {
     pub fn new(input: &str) -> Result<Self, String> {
-        match input.split_once(':') {
-            Some((interface_name, model)) => {
-                match get_interface(interface_name, model.to_string()) {
-                    Ok(interface) => Ok(Self { interface }),
-                    Err(err) => Err(err),
-                }
-            },
-            None => Err("Invalid interface:model format".to_string()),
-        }
+        let (interface_name, model) = input.split_once(':')
+            .ok_or("Invalid interface:model format".to_string())?;
+        let interface = get_interface(interface_name, model.to_string())?;
+        Ok(Self { interface })
     }
 }
